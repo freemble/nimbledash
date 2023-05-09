@@ -21,8 +21,8 @@ function AnalyticsLineChart(props) {
     var temp = [];
     for (var index = 0; index < 20; index++) {
       temp.push({
-        Cloud: model1[index],
-        NimbleEdge: model2[index],
+        Model1: model1[index],
+        Model2: model2[index],
         unit: "Millis ",
       });
     }
@@ -49,14 +49,14 @@ function AnalyticsLineChart(props) {
         <Legend />
         <Line
           type="monotone"
-          dataKey="NimbleEdge"
+          dataKey="Model2"
           stroke="#F3AD84"
           strokeWidth={3}
           activeDot={{ r: 4 }}
         />
         <Line
           type="monotone"
-          dataKey="Cloud"
+          dataKey="Model1"
           stroke="#343441"
           strokeWidth={3}
         />
