@@ -114,7 +114,7 @@ function DashboardPage() {
                 src="/assets/icons/total_inferences.jpg"
               ></img>
               <div className="card-info">
-                <p className="bodyText">Average Inferences</p>
+                <p className="bodyText">Total Inferences</p>
                 <p className="subHeading2">
                   Comparing latest versions of all model
                 </p>

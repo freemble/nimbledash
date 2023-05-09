@@ -1,5 +1,12 @@
 .loginPage {
   display: flex;
+  position: relative;
+}
+
+.loginPage-main-logo{
+  position: absolute;
+  left: 52px;
+  top: 60px;
 }
 
 .loginPage-img {
@@ -19,11 +26,13 @@
 .loginPage-button {
   width: 240px;
   height: 44px;
+  line-height: 44px;
   background: #6565ff;
   border-radius: 8px;
   cursor: pointer;
 
   display: flex;
+  text-align: center;
 
   align-items: center;
   justify-content: center;
