@@ -1,0 +1,35 @@
+:root {
+    --clr-accent: #6565ff;
+  }
+
+.modal-bg{
+    height: 100vh;
+    width: 100vw;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.modal{
+position: absolute;
+width: 720px;
+height: 300px;
+background-color: white;
+
+top: 50%;
+left: 50%;
+transform: translate(-50%,-50%);
+}
+
+.inputModal-textfield {
+  width: 450px;
+  height: 52px;
+  left: 661px;
+  top: 546px;
+
+  background: #eeeeee;
+  border-radius: 8px 0px 0px 8px;
+}
+
+.inputModal-button{
+    background-color: var(--clr-accent);
+}
+

@@ -1,7 +1,7 @@
 import React from "react";
 import "./dashboard_page.css";
 import "react-dropdown/style.css";
-import DropdownComponent from "../components/dropdown";
+import DropdownComponent from "../components/dropdownMenu/dropdown";
 import Dropdown from "react-bootstrap/Dropdown";
 import { DropdownButton, SplitButton, ButtonGroup } from "react-bootstrap";
 import DashboardCard from "../components/dashboardCard/dashboard_card";
