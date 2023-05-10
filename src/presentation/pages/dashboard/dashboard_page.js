@@ -23,8 +23,6 @@ function DashboardPage() {
   var [isModalVisible, setModalVisiblity] = useState(true);
   var [clientID, setClientID] = useState("N/A");
 
-  const fetchClientID = () => {};
-
   const handleClientIDChange = (input) => {
     setClientID(input);
     setModalVisiblity(false);
@@ -62,8 +60,8 @@ function DashboardPage() {
           <p className="heading3">Dashboard</p>
           <p className="subHeading">Live Analytical Updates.</p>
         </div>
-        <div className="dropdown-array" onClick={() => setModalVisiblity(true)}>
-          <div className="clientID-selector">
+        <div className="dropdown-array">
+          <div className="clientID-selector" onClick={() => setModalVisiblity(true)}>
             <p className="buttonText spinner-text">{clientID}</p>
           </div>
           <DropdownComponent itemList={modelIdList}></DropdownComponent>
