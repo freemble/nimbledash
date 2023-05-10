@@ -4,11 +4,13 @@ import "react-dropdown/style.css";
 import DropdownComponent from "../components/dropdownMenu/dropdown";
 import Dropdown from "react-bootstrap/Dropdown";
 import { DropdownButton, SplitButton, ButtonGroup } from "react-bootstrap";
+import { useState } from "react";
 import DashboardCard from "../components/dashboardCard/dashboard_card";
 import AnalyticsLineChart from "../components/charts/line_chart";
 import PieChartComponent from "../components/charts/pie_chart";
 import AnalyticsPieChart from "../components/charts/pie_chart";
 import AnalyticsRadarChart from "../components/charts/radar_chart";
+import InputModal from "../components/inputModal/inputModal";
 
 function DashboardPage() {
   var modelIdList = [
@@ -18,9 +20,24 @@ function DashboardPage() {
     "we_will_rock_you",
   ];
   var modelVersionList = ["v1.0.0", "v2.0.0", "v2.0.1", "v2.3.0"];
-  var clientIdSelectedIndex = 0;
+  var [isModalVisible, setModalVisiblity] = useState(true);
+  var [clientID, setClientID] = useState("N/A");
+
+  const fetchClientID = () => {};
+
+  const handleClientIDChange = (input) => {
+    setClientID(input);
+    setModalVisiblity(false);
+  };
+
   return (
     <div className="dashboardPage">
+      {isModalVisible && (
+        <InputModal
+          initValue={clientID}
+          getInputCallback={handleClientIDChange}
+        ></InputModal>
+      )}
       <div className="sidebar">
         <div className="sidebar-margin">
           <img className="sidebar-logo" src="/assets/logo.png"></img>
@@ -45,9 +62,9 @@ function DashboardPage() {
           <p className="heading3">Dashboard</p>
           <p className="subHeading">Live Analytical Updates.</p>
         </div>
-        <div className="dropdown-array">
+        <div className="dropdown-array" onClick={() => setModalVisiblity(true)}>
           <div className="clientID-selector">
-            <p className="buttonText spinner-text">clientID1</p>
+            <p className="buttonText spinner-text">{clientID}</p>
           </div>
           <DropdownComponent itemList={modelIdList}></DropdownComponent>
           <DropdownComponent itemList={modelVersionList}></DropdownComponent>

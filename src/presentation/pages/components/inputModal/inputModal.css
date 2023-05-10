@@ -4,16 +4,19 @@
 
 .modal-bg {
   height: 100vh;
-  width: 100vw;
+  width: 100%;
+  position: absolute;
   background: rgba(0, 0, 0, 0.8);
+  z-index: 2;
 }
 
-.modal {
+.input-modal {
   position: absolute;
   background-color: white;
   text-align: center;
   padding: 48px 52px 72px 52px;
   border-radius: 20px;
+  z-index: 3;
 
   top: 50%;
   left: 50%;

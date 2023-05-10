@@ -1,12 +1,21 @@
 import React from "react";
 import "./login_page.css";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import { useNavigate } from "react-router";
+import { DASHBOARD_PAGE_ROUTE } from "presentation/routes/route-paths";
+
 
 function LoginPage() {
-  const initGoogleLogin = useGoogleLogin({
-    onSuccess: (tokenResponse) => console.log(tokenResponse),
-    onError: () => console.log("Login Failed."),
-  });
+  const navigateTo = useNavigate();
+
+  const handleLoginSuccess = (response) => {
+    console.log(response);
+    navigateTo(DASHBOARD_PAGE_ROUTE);
+  };
+
+  const handleLoginFailure = () =>  {
+    
+  };
 
   return (
     <div className="loginPage">
@@ -31,15 +40,11 @@ function LoginPage() {
           <GoogleLogin
             theme="filled_blue"
             text="continue_with"
-            size="large"
-            useOneTap={true} 
             auto_select={true}
-            onSuccess={(credentialResponse) => {
-              console.log(credentialResponse);
-            }}
-            onError={() => {
-              console.log("Login Failed");
-            }}
+            useOneTap={true}
+            state_cookie_domain='single_host_origin'
+            onSuccess={handleLoginSuccess}
+            onError={handleLoginFailure}
           />
           </div>
         </div>
