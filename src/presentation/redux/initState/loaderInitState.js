@@ -1,3 +1,3 @@
-export const loaderInitState={
-    isLoading:true
-}
+export const loaderInitState = {
+  isLoading: true,
+};
