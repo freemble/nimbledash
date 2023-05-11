@@ -49,12 +49,15 @@ function DashboardPage() {
               className="sidebar-icon"
               src="/assets/icons/dashboard_selected.svg"
             ></img>
+            <p className="sidebar-item-desc selected-desc">Dashboard</p>
           </div>
           <div className="sidebar-item">
             <img className="sidebar-icon" src="/assets/icons/admin.svg"></img>
+            <p className="sidebar-item-desc">Upload model</p>
           </div>
           <div className="sidebar-item">
             <img className="sidebar-icon" src="/assets/icons/logout.svg"></img>
+            <p className="sidebar-item-desc">Logout</p>
           </div>
         </div>
         <div className="divider"></div>

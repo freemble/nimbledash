@@ -13,10 +13,19 @@
 }
 
 .sidebar {
-  width: 100;
+  width: 100px;
   display: flex;
   text-align: center;
   position: fixed;
+  /* background-color: red; */
+  z-index: 1;
+}
+
+.sidebar:hover {
+  width: 250px;
+  background-color: white;
+  box-shadow: 0px 0px 24px rgba(149, 157, 165, 0.2);
+
 }
 
 .sidebar-margin {
@@ -36,8 +45,11 @@
   border-radius: 8px;
   margin-bottom: 24px;
   position: relative;
+  display: flex;
   background-color: white;
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar-item:hover {
@@ -48,11 +60,18 @@
   background-color: var(--clr-accent);
 }
 
+.sidebar:hover .sidebar-item {
+  width: 200px;
+  padding: 0 16px;
+  justify-content: start;
+
+}
+
 .sidebar-icon {
-  position: absolute;
+  /* position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); */
   height: 20px;
 }
 
@@ -60,6 +79,24 @@
   height: 100vh;
   width: 1px;
   background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar:hover > .divider {
+  background-color: white;
+}
+
+.sidebar-item-desc{
+  display: none;
+  font-weight: 500;
+  color: #666;
+}
+.selected-desc{
+  color: white;
+}
+
+.sidebar:hover .sidebar-item-desc{
+  display: block;
+  margin: auto 16px;
 }
 
 /* DASHBOARD CONTENT */
@@ -186,3 +223,4 @@
   align-items: center;
   text-align: center;
 }
+
