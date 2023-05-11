@@ -14,7 +14,7 @@
   position: absolute;
   background-color: white;
   text-align: center;
-  padding: 48px 52px 72px 52px;
+  padding: 48px 40px 40px 40px;
   border-radius: 20px;
   z-index: 3;
 
@@ -26,6 +26,7 @@
 .inputModal-textfield-flex {
   display: flex;
   margin-top: 32px;
+  margin-bottom: 32px;
 }
 
 .inputModal-button-text {
@@ -51,7 +52,24 @@
   border: 0;
 }
 
-.inputModal-button:hover{
+.inputModal-button:hover {
   opacity: 0.8;
   cursor: pointer;
+}
+
+.input-modal-close {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  cursor: pointer;
+}
+
+.input-modal-error{
+  color: red;
+  font-weight: 500;
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translate(-50%,0);
+
 }

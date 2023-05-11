@@ -14,7 +14,7 @@ import InputModal from "../components/inputModal/inputModal";
 
 function DashboardPage() {
   var modelIdList = [
-    "Aggregated",
+    "All Models",
     "Nadaan Parindey",
     "om_prakash_mishra",
     "we_will_rock_you",
@@ -28,12 +28,17 @@ function DashboardPage() {
     setModalVisiblity(false);
   };
 
+  const closeModalCallback = () => {
+    setModalVisiblity(false);
+  };
+
   return (
     <div className="dashboardPage">
       {isModalVisible && (
         <InputModal
           initValue={clientID}
           getInputCallback={handleClientIDChange}
+          closeModalCallback={closeModalCallback}
         ></InputModal>
       )}
       <div className="sidebar">
@@ -61,7 +66,10 @@ function DashboardPage() {
           <p className="subHeading">Live Analytical Updates.</p>
         </div>
         <div className="dropdown-array">
-          <div className="clientID-selector" onClick={() => setModalVisiblity(true)}>
+          <div
+            className="clientID-selector"
+            onClick={() => setModalVisiblity(true)}
+          >
             <p className="buttonText spinner-text">{clientID}</p>
           </div>
           <DropdownComponent itemList={modelIdList}></DropdownComponent>
