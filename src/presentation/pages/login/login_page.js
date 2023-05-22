@@ -3,7 +3,7 @@ import "./login_page.css";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router";
 import { DASHBOARD_PAGE_ROUTE } from "presentation/routes/route-paths";
-
+import axios from "axios";
 
 function LoginPage() {
   const navigateTo = useNavigate();
@@ -13,9 +13,23 @@ function LoginPage() {
     navigateTo(DASHBOARD_PAGE_ROUTE);
   };
 
-  const handleLoginFailure = () =>  {
-    
-  };
+  const handleLoginFailure = () => {};
+
+  const googleLogin = useGoogleLogin({
+    // flow: "auth-code",
+    onSuccess: async tokenResponse => {
+      console.log(tokenResponse);
+      // fetching userinfo can be done on the client or the server
+      const userInfo = await axios
+        .get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        })
+        .then(res => res.data);
+
+      console.log(userInfo);
+    },
+    onError: (errorResponse) => console.log(errorResponse),
+  });
 
   return (
     <div className="loginPage">
@@ -32,20 +46,20 @@ function LoginPage() {
           <p className="subHeading margin-top-8 force-one-line">
             Please login to proceed to the dashboard.
           </p>
-          {/* <div className="loginPage-button" onClick={() => initGoogleLogin()}>
+          {/* <div className="loginPage-button" onClick={() => googleLogin()}>
             <img className="buttonLogo" src="/assets/logo_google.png"></img>
             <p className="buttonText">Login using Google</p>
           </div> */}
           <div className="loginPage-button">
-          <GoogleLogin
-            theme="filled_blue"
-            text="continue_with"
-            auto_select={true}
-            useOneTap={true}
-            state_cookie_domain='single_host_origin'
-            onSuccess={handleLoginSuccess}
-            onError={handleLoginFailure}
-          />
+            <GoogleLogin
+              theme="filled_blue"
+              text="continue_with"
+              auto_select={true}
+              useOneTap={true}
+              state_cookie_domain="single_host_origin"
+              onSuccess={handleLoginSuccess}
+              onError={handleLoginFailure}
+            />
           </div>
         </div>
         <p className="clickableLink">Can't login? Contact us</p>

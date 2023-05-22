@@ -1,5 +1,5 @@
 import axios from "axios";
-var URI = "https://mstak.tech/api/";
+var URI = "https://apimocha.com/nimble-dash/";
 
 export async function postRequest(endpoint, params) {
   var response = await axios.post(`${URI}${endpoint}`, params);

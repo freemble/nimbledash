@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./dashboard_page.css";
 import "react-dropdown/style.css";
 import DropdownComponent from "../components/dropdownMenu/dropdown";
@@ -11,8 +11,17 @@ import PieChartComponent from "../components/charts/pie_chart";
 import AnalyticsPieChart from "../components/charts/pie_chart";
 import AnalyticsRadarChart from "../components/charts/radar_chart";
 import InputModal from "../components/inputModal/inputModal";
+import { getRequest } from "data/remote_datasource";
 
 function DashboardPage() {
+  var [totalInferences, setTotalInferences] = useState(0);
+  var [totalErrors, setTotalErrors] = useState(0);
+  var [averageInferences, setAverageInferences] = useState(0);
+  var [averageLatency, setAverageLatency] = useState(0);
+  var [latencyTrends, setLatencyTrends] = useState({});
+  var [totalInferencesTrends, setTotalInferencesTrends] = useState({});
+  var [activeUsersTrends, setActiveUsersTrends] = useState({});
+
   var modelIdList = [
     "All Models",
     "Nadaan Parindey",
@@ -30,6 +39,25 @@ function DashboardPage() {
 
   const closeModalCallback = () => {
     setModalVisiblity(false);
+  };
+
+  useEffect(() => {
+    if (clientID != "N/A") {
+      fetchRemoteData();
+    }
+  }, [clientID]);
+
+  const fetchRemoteData = async () => {
+    var res = await getRequest("agg");
+    setTotalInferences(res["total_inferences"]);
+    setTotalErrors(res["total_errors"]);
+    setAverageInferences(res["avg_inferences"]);
+    setAverageLatency(res["avg_latency"]);
+    setLatencyTrends(res["latency_trends"]);
+    setTotalInferencesTrends(res["total_inferences_trends"]);
+    setActiveUsersTrends(res["active_users_trends"]);
+
+    console.log(res);
   };
 
   return (
@@ -83,7 +111,7 @@ function DashboardPage() {
             cardIconAddress="/assets/icons/total_inferences.jpg"
             cardInfoTitle="Total Inferences"
             cardInfoSubtitle="Lifetime"
-            cardText="584734"
+            cardText={totalInferences}
             cardSubText="calls made"
           ></DashboardCard>
 
@@ -93,7 +121,7 @@ function DashboardPage() {
             cardIconAddress="/assets/icons/total_error.jpg"
             cardInfoTitle="Total Errors"
             cardInfoSubtitle="Lifetime"
-            cardText="84"
+            cardText={totalErrors}
             cardSubText="calls made"
           ></DashboardCard>
 
@@ -103,7 +131,7 @@ function DashboardPage() {
             cardIconAddress="/assets/icons/avg_inferences.jpg"
             cardInfoTitle="Average Inferences"
             cardInfoSubtitle="Per Day"
-            cardText="98734"
+            cardText={averageInferences}
             cardSubText="calls made"
           ></DashboardCard>
 
@@ -113,7 +141,7 @@ function DashboardPage() {
             cardIconAddress="/assets/icons/avg_latency.jpg"
             cardInfoTitle="Average Latency"
             cardInfoSubtitle="Per Day"
-            cardText="11.847"
+            cardText={averageLatency}
             cardSubText="milliseconds"
           ></DashboardCard>
         </div>
@@ -129,7 +157,7 @@ function DashboardPage() {
               <p className="subHeading2">Last 20 Inferences</p>
             </div>
           </div>
-          <AnalyticsLineChart></AnalyticsLineChart>
+          <AnalyticsLineChart trends={latencyTrends}></AnalyticsLineChart>
         </div>
 
         <div className="row-flex">
@@ -146,7 +174,9 @@ function DashboardPage() {
                 </p>
               </div>
             </div>
-            <AnalyticsPieChart></AnalyticsPieChart>
+            <AnalyticsPieChart
+              trends={totalInferencesTrends}
+            ></AnalyticsPieChart>
           </div>
 
           <div className="right-margin24"></div>
@@ -162,7 +192,9 @@ function DashboardPage() {
                 <p className="subHeading2">Across all the live models</p>
               </div>
             </div>
-            <AnalyticsRadarChart></AnalyticsRadarChart>
+            <AnalyticsRadarChart
+              trends={activeUsersTrends}
+            ></AnalyticsRadarChart>
           </div>
         </div>
       </div>

@@ -7,6 +7,8 @@ function InputModal(props) {
   var closeModalCallback = props.closeModalCallback;
   var [modalErrorMessage, setModalErrorMessage] = useState("");
 
+  document.body.classList.add("overflow-hidden");
+
   const handleSubmit = (event) => {
     event.preventDefault();
     var userInput = event.target.clientID.value;
@@ -15,37 +17,37 @@ function InputModal(props) {
     } else {
       getInputCallback(userInput);
     }
+    document.body.classList.remove("overflow-hidden");
   };
 
   return (
     <div>
-      <div className="modal-bg">
-        <div className="input-modal">
-          <img
-            className="input-modal-close"
-            src="assets/icons/close.svg"
-            onClick={closeModalCallback}
-          ></img>
-          <p className="heading3">Enter clientID</p>
-          <p className="subHeading margin-top-8">
-            Entered clientId will be verified from our backend services
-          </p>
-          <form className="inputModal-textfield-flex" onSubmit={handleSubmit}>
-            <input
-              type="text"
-              name="clientID"
-              className="inputModal-textfield"
-              placeholder={initValue}
-            />
-            <input
-              type="submit"
-              className="inputModal-button buttonText"
-            ></input>
-          </form>
-          {modalErrorMessage != "" && (
-            <p className="input-modal-error">{modalErrorMessage}</p>
-          )}
-        </div>
+      <div className="modal-bg"></div>
+      <div className="input-modal">
+        <img
+          className="input-modal-close"
+          src="assets/icons/close.svg"
+          onClick={() => {
+            document.body.classList.remove("overflow-hidden");
+            closeModalCallback();
+          }}
+        ></img>
+        <p className="heading3">Enter clientID</p>
+        <p className="subHeading margin-top-8">
+          Entered clientId will be verified from our backend services
+        </p>
+        <form className="inputModal-textfield-flex" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="clientID"
+            className="inputModal-textfield"
+            placeholder={initValue}
+          />
+          <input type="submit" className="inputModal-button buttonText"></input>
+        </form>
+        {modalErrorMessage != "" && (
+          <p className="input-modal-error">{modalErrorMessage}</p>
+        )}
       </div>
     </div>
   );

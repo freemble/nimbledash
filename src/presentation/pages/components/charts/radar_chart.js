@@ -1,4 +1,5 @@
-import React, { PureComponent } from "react";
+import React, { memo, useEffect, useState } from "react";
+
 import {
   Radar,
   RadarChart,
@@ -8,56 +9,48 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
-  {
-    subject: "Model 1",
-    A: 120,
-    fullMark: 150,
-  },
-  {
-    subject: "Model 2",
-    A: 98,
-    fullMark: 150,
-  },
-  {
-    subject: "Model 3",
-    A: 86,
-    fullMark: 150,
-  },
-  {
-    subject: "Model 4",
-    A: 99,
-    fullMark: 150,
-  },
-  {
-    subject: "Model 5",
-    A: 85,
-    fullMark: 150,
-  },
-  {
-    subject: "Model 6",
-    A: 65,
-    fullMark: 150,
-  },
-];
+function AnalyticsRadarChart(props) {
+  const trends = props.trends;
+  const trendsKeys = Object.keys(trends);
+  const [data, setData] = useState([]);
 
-export default class AnalyticsRadarChart extends PureComponent {
-  render() {
-    return (
-      <ResponsiveContainer width="100%" height="100%">
-        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-          <PolarGrid />
-          <PolarAngleAxis dataKey="subject" />
-          <PolarRadiusAxis />
-          <Radar
-            name="Mike"
-            dataKey="A"
-            stroke="#8884d8"
-            fill="#8884d8"
-            fillOpacity={0.6}
-          />
-        </RadarChart>
-      </ResponsiveContainer>
-    );
-  }
+  useEffect(() => {
+    var temp = [];
+    var maxUsers = 0;
+
+    trendsKeys.forEach((key) => {
+      if (trends[key] > maxUsers) {
+        maxUsers = trends[key];
+      }
+    });
+
+    trendsKeys.forEach((key, index) => {
+      temp.push({
+        subject: key,
+        A: trends[key],
+        fullMark: maxUsers,
+      });
+    });
+
+    setData(temp);
+  }, [trends]);
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+        <PolarGrid />
+        <PolarAngleAxis dataKey="subject" />
+        <PolarRadiusAxis />
+        <Radar
+          name="Mike"
+          dataKey="A"
+          stroke="#8884d8"
+          fill="#8884d8"
+          fillOpacity={0.6}
+        />
+      </RadarChart>
+    </ResponsiveContainer>
+  );
 }
+
+export default memo(AnalyticsRadarChart);

@@ -10,24 +10,38 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useState, useEffect } from "react";
+import { STROKE_COLORS_LIST } from "core/constants";
 
 function AnalyticsLineChart(props) {
-  const model1 = Array.from({ length: 20 }, () => Math.random() * 25);
-  const model2 = Array.from({ length: 20 }, () => Math.random() * 25);
+  const trends = props.trends;
   const [data, setData] = useState([]);
-  var counter = 0;
 
   useEffect(() => {
-    var temp = [];
-    for (var index = 0; index < 20; index++) {
-      temp.push({
-        Model1: model1[index],
-        Model2: model2[index],
-        unit: "Millis ",
+    var tempData = [];
+    var modelKeys = Object.keys(trends);
+    var maxLen = -1;
+
+    modelKeys.forEach((key) => {
+      if (trends[key].length > maxLen) maxLen = trends[key].length;
+    });
+
+    for (var index = 0; index < maxLen; index++) {
+      var tempMap = {};
+      modelKeys.forEach((key) => {
+        var trendList = trends[key];
+        if (trendList.length - 1 - index >= 0) {
+          tempMap[key] = trendList[trendList.length - 1 - index];
+        } else {
+          tempMap[key] = 0;
+        }
       });
+      tempMap["unit"] = "millis";
+      tempData.push(tempMap);
     }
-    setData(temp);
-  }, []);
+
+    console.log(tempData);
+    setData(tempData);
+  }, [trends]);
 
   return (
     <ResponsiveContainer debounce={300} width="100%" height="100%">
@@ -47,19 +61,15 @@ function AnalyticsLineChart(props) {
         <YAxis unit=" millls" width={100} />
         <Tooltip />
         <Legend />
-        <Line
-          type="monotone"
-          dataKey="Model2"
-          stroke="#F3AD84"
-          strokeWidth={3}
-          activeDot={{ r: 4 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="Model1"
-          stroke="#343441"
-          strokeWidth={3}
-        />
+          {Object.keys(trends).map((key, index) => (
+            <Line
+              type="monotone"
+              dataKey={key}
+              stroke={STROKE_COLORS_LIST[index % STROKE_COLORS_LIST.length]}
+              strokeWidth={3}
+              activeDot={{ r: 4 }}
+            />
+          ))}
       </LineChart>
     </ResponsiveContainer>
   );
