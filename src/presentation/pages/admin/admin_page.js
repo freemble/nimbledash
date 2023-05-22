@@ -1,10 +1,14 @@
 import React, { useEffect } from "react";
 import "./admin_page.css";
 import DropdownComponent from "presentation/components/dropdownMenu/dropdown";
+import SideBar from "presentation/components/sideBar/side_bar";
 
 function AdminPage() {
   return (
     <div className="adminPage">
+        
+        <SideBar></SideBar>
+
       <div className="admin-page-left-pane">
         <div className="page-title">
           <p className="heading3">Dashboard</p>

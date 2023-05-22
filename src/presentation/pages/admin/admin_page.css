@@ -4,6 +4,7 @@
 
 .admin-page-left-pane {
   margin: 72px 80px;
+  margin-left: 180px;
   flex: 1.5;
 }
 

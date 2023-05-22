@@ -12,6 +12,7 @@ import AnalyticsPieChart from "../../components/charts/pie_chart";
 import AnalyticsRadarChart from "../../components/charts/radar_chart";
 import InputModal from "../../components/inputModal/inputModal";
 import { getRequest } from "data/remote_datasource";
+import SideBar from "presentation/components/sideBar/side_bar";
 
 function DashboardPage() {
   var [totalInferences, setTotalInferences] = useState(0);
@@ -69,27 +70,8 @@ function DashboardPage() {
           closeModalCallback={closeModalCallback}
         ></InputModal>
       )}
-      <div className="sidebar">
-        <div className="sidebar-margin">
-          <img className="sidebar-logo" src="/assets/logo.png"></img>
-          <div className="sidebar-item sidebar-item-selected">
-            <img
-              className="sidebar-icon"
-              src="/assets/icons/dashboard_selected.svg"
-            ></img>
-            <p className="sidebar-item-desc selected-desc">Dashboard</p>
-          </div>
-          <div className="sidebar-item">
-            <img className="sidebar-icon" src="/assets/icons/admin.svg"></img>
-            <p className="sidebar-item-desc">Upload model</p>
-          </div>
-          <div className="sidebar-item">
-            <img className="sidebar-icon" src="/assets/icons/logout.svg"></img>
-            <p className="sidebar-item-desc">Logout</p>
-          </div>
-        </div>
-        <div className="divider"></div>
-      </div>
+
+      <SideBar></SideBar>
 
       <div className="dashboard-content">
         <div className="page-title">
