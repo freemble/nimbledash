@@ -6,6 +6,7 @@ import { useState } from "react";
 
 function DropdownComponent(props) {
   var itemList = props.itemList;
+  var customClass = props.customClass;
   var [selectedItemIndex, setSelectedItemIndex] = useState(0);
   return (
     <>
@@ -16,7 +17,7 @@ function DropdownComponent(props) {
         size="lg"
         title={itemList[selectedItemIndex]}
         variant=""
-        bsPrefix="custom-dropdown buttonText"
+        bsPrefix={customClass + " " + "buttonText"}
         onSelect={(selected) => {
           setSelectedItemIndex(parseInt(selected));
         }}

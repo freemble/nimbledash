@@ -102,6 +102,27 @@ a {
   font-weight: 400;
 }
 
+.heading4 {
+  font-size: 1.25rem;
+  color: var(--clr-primary);
+  margin-bottom: 0.1rem;
+  font-weight: 500;
+}
+
+.heading5 {
+  font-size: 1.25rem;
+  color: white;
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+.heading6 {
+  font-size: 1.25rem;
+  color: var(--clr-primary);
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
 .subHeading {
   font-size: 1rem;
   color: var(--clr-fade-text);
@@ -110,6 +131,13 @@ a {
 .subHeading2 {
   font-size: 0.8rem;
   color: var(--clr-fade-text);
+  font-weight: 400;
+  margin-bottom: 0;
+}
+
+.subHeading3 {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 400;
   margin-bottom: 0;
 }

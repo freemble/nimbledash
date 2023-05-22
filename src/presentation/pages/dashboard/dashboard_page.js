@@ -1,16 +1,16 @@
 import React, { useEffect } from "react";
 import "./dashboard_page.css";
 import "react-dropdown/style.css";
-import DropdownComponent from "../components/dropdownMenu/dropdown";
+import DropdownComponent from "../../components/dropdownMenu/dropdown";
 import Dropdown from "react-bootstrap/Dropdown";
 import { DropdownButton, SplitButton, ButtonGroup } from "react-bootstrap";
 import { useState } from "react";
-import DashboardCard from "../components/dashboardCard/dashboard_card";
-import AnalyticsLineChart from "../components/charts/line_chart";
-import PieChartComponent from "../components/charts/pie_chart";
-import AnalyticsPieChart from "../components/charts/pie_chart";
-import AnalyticsRadarChart from "../components/charts/radar_chart";
-import InputModal from "../components/inputModal/inputModal";
+import DashboardCard from "../../components/dashboardCard/dashboard_card";
+import AnalyticsLineChart from "../../components/charts/line_chart";
+import PieChartComponent from "../../components/charts/pie_chart";
+import AnalyticsPieChart from "../../components/charts/pie_chart";
+import AnalyticsRadarChart from "../../components/charts/radar_chart";
+import InputModal from "../../components/inputModal/inputModal";
 import { getRequest } from "data/remote_datasource";
 
 function DashboardPage() {
@@ -103,8 +103,8 @@ function DashboardPage() {
           >
             <p className="buttonText spinner-text">{clientID}</p>
           </div>
-          <DropdownComponent itemList={modelIdList}></DropdownComponent>
-          <DropdownComponent itemList={modelVersionList}></DropdownComponent>
+          <DropdownComponent itemList={modelIdList} customClass={"custom-dropdown"}></DropdownComponent>
+          <DropdownComponent itemList={modelVersionList} customClass={"custom-dropdown"}></DropdownComponent>
         </div>
         <div className="number-card-array">
           <DashboardCard
