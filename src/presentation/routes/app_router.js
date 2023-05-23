@@ -21,6 +21,7 @@ function AppRouter(props) {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    console.log("useeffect triggerer");
     dispatch(loaderActions.toggleLoader(true));
 
     var token = localStorage.getItem(ACCESS_TOKEN);
@@ -29,6 +30,7 @@ function AppRouter(props) {
       if (isValid) {
         navigateTo(DASHBOARD_PAGE_ROUTE);
       } else if (!window.location.href.includes("/login")) {
+        console.log("shoud go to login");
         navigateTo(LOGIN_PAGE_ROUTE);
       }
     });
@@ -41,8 +43,15 @@ function AppRouter(props) {
       .get("https://www.googleapis.com/oauth2/v3/userinfo", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .catch(() => false)
-      .then(() => true);
+      .then((res) => {
+        if (res.status == 200) {
+          return true;
+        }
+        return false;
+      })
+      .catch(() => {
+        return false;
+      });
   };
 
   return (
