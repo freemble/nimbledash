@@ -18,18 +18,19 @@ function LoginPage() {
 
   const googleLogin = useGoogleLogin({
     // flow: "auth-code",
-    onSuccess: async tokenResponse => {
+    onSuccess: async (tokenResponse) => {
       console.log(tokenResponse);
-      
-      localStorage.setItem(ACCESS_TOKEN,tokenResponse.access_token);
+
+      localStorage.setItem(ACCESS_TOKEN, tokenResponse.access_token);
 
       const userInfo = await axios
-        .get('https://www.googleapis.com/oauth2/v3/userinfo', {
+        .get("https://www.googleapis.com/oauth2/v3/userinfo", {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         })
-        .then(res => res.data);
+        .then((res) => res.data);
 
       console.log(userInfo.email);
+      navigateTo(DASHBOARD_PAGE_ROUTE);
     },
     onError: (errorResponse) => console.log(errorResponse),
   });
@@ -49,8 +50,15 @@ function LoginPage() {
           <p className="subHeading margin-top-8 force-one-line">
             Please login to proceed to the dashboard.
           </p>
-          <div className="custom-loginPage-button clickable" onClick={() => googleLogin()}>
-            <img className="buttonLogo" src="/assets/logo_google.png" height={"28px"}></img>
+          <div
+            className="custom-loginPage-button clickable"
+            onClick={() => googleLogin()}
+          >
+            <img
+              className="buttonLogo"
+              src="/assets/logo_google.png"
+              height={"28px"}
+            ></img>
             <p className="buttonText">Login using Google</p>
           </div>
           {/* <div className="loginPage-button">

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Route, Routes } from "react-router";
 import {
   ADMIN_PAGE_ROUTE,
@@ -20,20 +21,18 @@ function AppRouter(props) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!window.location.href.includes("/login")) {
-      var token = localStorage.getItem(ACCESS_TOKEN);
+    dispatch(loaderActions.toggleLoader(true));
 
-      if (token == null) {
+    var token = localStorage.getItem(ACCESS_TOKEN);
+
+    isTokenValid(token).then((isValid) => {
+      if (isValid) {
+        navigateTo(DASHBOARD_PAGE_ROUTE);
+      } else if (!window.location.href.includes("/login")) {
         navigateTo(LOGIN_PAGE_ROUTE);
-      } else {
-        isTokenValid(token).then((isValid) => {
-          if (!isValid) {
-            navigateTo(LOGIN_PAGE_ROUTE);
-          }
-        });
       }
-    }
-    // @ts-ignore
+    });
+
     dispatch(loaderActions.toggleLoader(false));
   }, []);
 
