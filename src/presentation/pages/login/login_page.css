@@ -30,10 +30,23 @@
   margin: 2.4rem auto;
 }
 
+.custom-loginPage-button {
+  height: 48px;
+  width: 240px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin: 2.4rem auto;
+  background-color: #6565FF;
+}
+
 .buttonLogo {
   height: 16;
   width: 16;
+  margin: auto 0;
   margin-right: 12px;
+
 }
 
 .center-vertically {
