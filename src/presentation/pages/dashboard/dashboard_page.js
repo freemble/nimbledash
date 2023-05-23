@@ -36,6 +36,10 @@ function DashboardPage() {
     setClientID(input);
   };
 
+  const closeModalCallback = () => {
+    setModalVisiblity(false);
+  };
+
   useEffect(() => {
     if (clientID != "") {
       validateCliendID();
@@ -86,31 +90,34 @@ function DashboardPage() {
           }
         });
         console.log(tempJson);
-        fetchMetrics();
+        fetchMetrics(null, null);
         setModelJson(tempJson);
       })
       .catch((e) => {
         console.log(e);
         toast.error("Something Went Wrong.");
       });
-      dispatch(loaderActions.toggleLoader(false));
+    dispatch(loaderActions.toggleLoader(false));
   };
 
-  const closeModalCallback = () => {
-    setModalVisiblity(false);
-  };
-
-  const fetchMetrics = async () => {
+  const fetchMetrics = async (modelName, versionName) => {
+    console.log("in function", modelName, versionName);
+    var uri = "";
+    if (modelName == null && versionName == null) {
+      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/inference`;
+    } else if (modelName != null && versionName == null) {
+      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/inference`;
+    } else if (modelName != null && versionName != null) {
+      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/versions/${versionName}/inference`;
+    }
+    console.log("request uri is", uri);
     await axios
-      .get(
-        `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/inference`,
-        {
-          headers: {
-            tokenid: localStorage.getItem(USER_EMAIL),
-            SsoToken: localStorage.getItem(ACCESS_TOKEN),
-          },
-        }
-      )
+      .get(uri, {
+        headers: {
+          tokenid: localStorage.getItem(USER_EMAIL),
+          SsoToken: localStorage.getItem(ACCESS_TOKEN),
+        },
+      })
       .then((res) => {
         console.log(res.data);
         setMetrics(res.data);
@@ -149,7 +156,12 @@ function DashboardPage() {
                 itemList={Object.keys(modelJson)}
                 customClass={"custom-dropdown"}
                 onChangeCallback={(modelIndex) => {
-                  // console.log(modelName);
+                  console.log("modelIndex", modelIndex);
+                  if (modelIndex == 0) {
+                    fetchMetrics(null, null);
+                  } else {
+                    fetchMetrics(Object.keys(modelJson)[modelIndex], null);
+                  }
                   setSelectedModelIndex(modelIndex);
                 }}
               ></DropdownComponent>
@@ -157,6 +169,21 @@ function DashboardPage() {
                 itemList={modelJson[Object.keys(modelJson)[selectedModelIndex]]}
                 customClass={"custom-dropdown"}
                 onChangeCallback={(versionIndex) => {
+                  if (selectedModelIndex == 0) {
+                    fetchMetrics(null, null);
+                  } else if (versionIndex == 0) {
+                    fetchMetrics(
+                      Object.keys(modelJson)[selectedModelIndex],
+                      null
+                    );
+                  } else {
+                    fetchMetrics(
+                      Object.keys(modelJson)[selectedModelIndex],
+                      modelJson[Object.keys(modelJson)[selectedModelIndex]][
+                        versionIndex
+                      ]
+                    );
+                  }
                   selectedVersionIndex = versionIndex;
                 }}
               ></DropdownComponent>
