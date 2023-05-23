@@ -1,13 +1,17 @@
+// @ts-nocheck
 import React from "react";
 import "./login_page.css";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router";
 import { DASHBOARD_PAGE_ROUTE } from "presentation/routes/route-paths";
 import axios from "axios";
-import { ACCESS_TOKEN } from "core/constants";
+import { ACCESS_TOKEN, USER_EMAIL } from "core/constants";
+import { useDispatch } from "react-redux";
+import { loaderActions } from "presentation/redux/stores/store";
 
 function LoginPage() {
   const navigateTo = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLoginSuccess = (response) => {
     console.log(response);
@@ -17,22 +21,23 @@ function LoginPage() {
   const handleLoginFailure = () => {};
 
   const googleLogin = useGoogleLogin({
-    // flow: "auth-code",
     onSuccess: async (tokenResponse) => {
-      console.log(tokenResponse);
-
-      localStorage.setItem(ACCESS_TOKEN, tokenResponse.access_token);
-
       const userInfo = await axios
         .get("https://www.googleapis.com/oauth2/v3/userinfo", {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         })
         .then((res) => res.data);
 
-      console.log(userInfo.email);
+      localStorage.setItem(ACCESS_TOKEN, tokenResponse.access_token);
+      localStorage.setItem(USER_EMAIL, userInfo.email);
+
       navigateTo(DASHBOARD_PAGE_ROUTE);
+      dispatch(loaderActions.toggleLoader(false));
     },
-    onError: (errorResponse) => console.log(errorResponse),
+    onError: (errorResponse) => {
+      console.log(errorResponse);
+      dispatch(loaderActions.toggleLoader(false));
+    },
   });
 
   return (
@@ -52,7 +57,10 @@ function LoginPage() {
           </p>
           <div
             className="custom-loginPage-button clickable"
-            onClick={() => googleLogin()}
+            onClick={() => {
+              dispatch(loaderActions.toggleLoader(true));
+              googleLogin();
+            }}
           >
             <img
               className="buttonLogo"

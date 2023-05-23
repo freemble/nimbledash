@@ -3,6 +3,7 @@ export const GET_ANALYTICS = "geteAnalytics";
 
 //LOCAL STORAGE KEY
 export const ACCESS_TOKEN = "at";
+export const USER_EMAIL = "user_email";
 
 // COLORS
 export const ACCENT_COLOR = "#6565FF"

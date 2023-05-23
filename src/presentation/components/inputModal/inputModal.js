@@ -7,8 +7,6 @@ function InputModal(props) {
   var closeModalCallback = props.closeModalCallback;
   var [modalErrorMessage, setModalErrorMessage] = useState("");
 
-  document.body.classList.add("overflow-hidden");
-
   const handleSubmit = (event) => {
     event.preventDefault();
     var userInput = event.target.clientID.value;
@@ -17,7 +15,6 @@ function InputModal(props) {
     } else {
       getInputCallback(userInput);
     }
-    document.body.classList.remove("overflow-hidden");
   };
 
   return (
@@ -28,7 +25,6 @@ function InputModal(props) {
           className="input-modal-close"
           src="assets/icons/close.svg"
           onClick={() => {
-            document.body.classList.remove("overflow-hidden");
             closeModalCallback();
           }}
         ></img>

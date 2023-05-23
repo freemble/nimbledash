@@ -33,7 +33,6 @@ function AdminPage() {
     } else {
       //   getInputCallback(userInput);
     }
-    document.body.classList.remove("overflow-hidden");
   };
 
   return (

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useEffect } from "react";
 import "./dashboard_page.css";
 import "react-dropdown/style.css";
@@ -13,52 +14,108 @@ import AnalyticsRadarChart from "../../components/charts/radar_chart";
 import InputModal from "../../components/inputModal/inputModal";
 import { getRequest } from "data/remote_datasource";
 import SideBar from "presentation/components/sideBar/side_bar";
+import axios from "axios";
+import { ACCESS_TOKEN, USER_EMAIL } from "core/constants";
+import { useDispatch } from "react-redux";
+import { loaderActions } from "presentation/redux/stores/store";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function DashboardPage() {
-  var [totalInferences, setTotalInferences] = useState(0);
-  var [totalErrors, setTotalErrors] = useState(0);
-  var [averageInferences, setAverageInferences] = useState(0);
-  var [averageLatency, setAverageLatency] = useState(0);
-  var [latencyTrends, setLatencyTrends] = useState({});
-  var [totalInferencesTrends, setTotalInferencesTrends] = useState({});
-  var [activeUsersTrends, setActiveUsersTrends] = useState({});
+  var [metrics, setMetrics] = useState({});
+  var [modelJson, setModelJson] = useState({});
+  var [selectedModelIndex, setSelectedModelIndex] = useState(0);
+  var selectedVersionIndex = 0;
+  const dispatch = useDispatch();
 
-  var modelIdList = [
-    "All Models",
-    "Nadaan Parindey",
-    "om_prakash_mishra",
-    "we_will_rock_you",
-  ];
-  var modelVersionList = ["v1.0.0", "v2.0.0", "v2.0.1", "v2.3.0"];
   var [isModalVisible, setModalVisiblity] = useState(true);
-  var [clientID, setClientID] = useState("N/A");
+  var [clientID, setClientID] = useState("");
 
   const handleClientIDChange = (input) => {
+    dispatch(loaderActions.toggleLoader(true));
     setClientID(input);
-    setModalVisiblity(false);
+  };
+
+  useEffect(() => {
+    if (clientID != "") {
+      validateCliendID();
+    }
+  }, [clientID]);
+
+  const validateCliendID = async () => {
+    await axios
+      .post(
+        "http://localhost:8010/proxy/mds/api/v1/admin/sso",
+        { email: localStorage.getItem(USER_EMAIL) },
+        {
+          headers: { clientid: clientID },
+        }
+      )
+      .then((res) => {
+        if (res.data["permission"] == "read_write") {
+          fetchModelList();
+          setModalVisiblity(false);
+        } else {
+          toast.error("Wrong Clientid");
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        toast.error("Something Went Wrong.");
+      });
+  };
+
+  const fetchModelList = async () => {
+    var tempJson = {};
+    await axios
+      .get("http://localhost:8010/proxy/mds/api/v1/admin/models", {
+        headers: {
+          clientid: clientID,
+          tokenid: localStorage.getItem(USER_EMAIL),
+          SsoToken: localStorage.getItem(ACCESS_TOKEN),
+        },
+      })
+      .then((res) => {
+        tempJson["All Models"] = ["Latest"];
+        res.data.models.forEach((modelNameVersionMap) => {
+          var key = modelNameVersionMap.modelName;
+          if (tempJson.hasOwnProperty(key)) {
+            tempJson[key].push(modelNameVersionMap.modelVersion);
+          } else {
+            tempJson[key] = ["All Versions", modelNameVersionMap.modelVersion];
+          }
+        });
+        console.log(tempJson);
+        fetchMetrics();
+        setModelJson(tempJson);
+      })
+      .catch((e) => {
+        console.log(e);
+        toast.error("Something Went Wrong.");
+      });
+      dispatch(loaderActions.toggleLoader(false));
   };
 
   const closeModalCallback = () => {
     setModalVisiblity(false);
   };
 
-  useEffect(() => {
-    if (clientID != "N/A") {
-      fetchRemoteData();
-    }
-  }, [clientID]);
-
-  const fetchRemoteData = async () => {
-    var res = await getRequest("agg");
-    setTotalInferences(res["total_inferences"]);
-    setTotalErrors(res["total_errors"]);
-    setAverageInferences(res["avg_inferences"]);
-    setAverageLatency(res["avg_latency"]);
-    setLatencyTrends(res["latency_trends"]);
-    setTotalInferencesTrends(res["total_inferences_trends"]);
-    setActiveUsersTrends(res["active_users_trends"]);
-
-    console.log(res);
+  const fetchMetrics = async () => {
+    await axios
+      .get(
+        `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/inference`,
+        {
+          headers: {
+            tokenid: localStorage.getItem(USER_EMAIL),
+            SsoToken: localStorage.getItem(ACCESS_TOKEN),
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res.data);
+        setMetrics(res.data);
+      })
+      .catch((e) => {});
   };
 
   return (
@@ -73,113 +130,133 @@ function DashboardPage() {
 
       <SideBar></SideBar>
 
-      <div className="dashboard-content">
-        <div className="page-title">
-          <p className="heading3">Dashboard</p>
-          <p className="subHeading">Live Analytical Updates.</p>
-        </div>
-        <div className="dropdown-array">
-          <div
-            className="clientID-selector"
-            onClick={() => setModalVisiblity(true)}
-          >
-            <p className="buttonText spinner-text">{clientID}</p>
+      {Object.keys(metrics).length != 0 && (
+        <div className="dashboard-content">
+          <div className="page-title">
+            <p className="heading3">Dashboard</p>
+            <p className="subHeading">Live Analytical Updates.</p>
           </div>
-          <DropdownComponent itemList={modelIdList} customClass={"custom-dropdown"}></DropdownComponent>
-          <DropdownComponent itemList={modelVersionList} customClass={"custom-dropdown"}></DropdownComponent>
-        </div>
-        <div className="number-card-array">
-          <DashboardCard
-            cardIconAddress="/assets/icons/total_inferences.jpg"
-            cardInfoTitle="Total Inferences"
-            cardInfoSubtitle="Lifetime"
-            cardText={totalInferences}
-            cardSubText="calls made"
-          ></DashboardCard>
+          <div className="dropdown-array">
+            <div
+              className="clientID-selector"
+              onClick={() => setModalVisiblity(true)}
+            >
+              <p className="buttonText spinner-text">{clientID}</p>
+            </div>
 
-          <div className="right-margin24"></div>
-
-          <DashboardCard
-            cardIconAddress="/assets/icons/total_error.jpg"
-            cardInfoTitle="Total Errors"
-            cardInfoSubtitle="Lifetime"
-            cardText={totalErrors}
-            cardSubText="calls made"
-          ></DashboardCard>
-
-          <div className="right-margin24"></div>
-
-          <DashboardCard
-            cardIconAddress="/assets/icons/avg_inferences.jpg"
-            cardInfoTitle="Average Inferences"
-            cardInfoSubtitle="Per Day"
-            cardText={averageInferences}
-            cardSubText="calls made"
-          ></DashboardCard>
-
-          <div className="right-margin24"></div>
-
-          <DashboardCard
-            cardIconAddress="/assets/icons/avg_latency.jpg"
-            cardInfoTitle="Average Latency"
-            cardInfoSubtitle="Per Day"
-            cardText={averageLatency}
-            cardSubText="milliseconds"
-          ></DashboardCard>
-        </div>
-
-        <div className="graph-holder">
-          <div className="heading-row">
-            <img
-              className="card-icon"
-              src="/assets/icons/avg_latency.jpg"
-            ></img>
-            <div className="card-info">
-              <p className="bodyText">Latency Trends</p>
-              <p className="subHeading2">Last 20 Inferences</p>
+            <div>
+              <DropdownComponent
+                itemList={Object.keys(modelJson)}
+                customClass={"custom-dropdown"}
+                onChangeCallback={(modelIndex) => {
+                  // console.log(modelName);
+                  setSelectedModelIndex(modelIndex);
+                }}
+              ></DropdownComponent>
+              <DropdownComponent
+                itemList={modelJson[Object.keys(modelJson)[selectedModelIndex]]}
+                customClass={"custom-dropdown"}
+                onChangeCallback={(versionIndex) => {
+                  selectedVersionIndex = versionIndex;
+                }}
+              ></DropdownComponent>
             </div>
           </div>
-          <AnalyticsLineChart trends={latencyTrends}></AnalyticsLineChart>
-        </div>
+          <div className="number-card-array">
+            <DashboardCard
+              cardIconAddress="/assets/icons/total_inferences.jpg"
+              cardInfoTitle="Total Inferences"
+              cardInfoSubtitle="Lifetime"
+              cardText={metrics["totalInferences"]}
+              cardSubText="calls made"
+            ></DashboardCard>
 
-        <div className="row-flex">
-          <div className="pie-graph-holder">
+            <div className="right-margin24"></div>
+
+            <DashboardCard
+              cardIconAddress="/assets/icons/total_error.jpg"
+              cardInfoTitle="Total Errors"
+              cardInfoSubtitle="Lifetime"
+              cardText={metrics["totalErrors"]}
+              cardSubText="calls made"
+            ></DashboardCard>
+
+            <div className="right-margin24"></div>
+
+            <DashboardCard
+              cardIconAddress="/assets/icons/avg_inferences.jpg"
+              cardInfoTitle="Average Inferences"
+              cardInfoSubtitle="Per Day"
+              cardText={metrics["averageInferences"]}
+              cardSubText="calls made"
+            ></DashboardCard>
+
+            <div className="right-margin24"></div>
+
+            <DashboardCard
+              cardIconAddress="/assets/icons/avg_latency.jpg"
+              cardInfoTitle="Average Latency"
+              cardInfoSubtitle="Per Day"
+              cardText={metrics["averageLatency"]}
+              cardSubText="milliseconds"
+            ></DashboardCard>
+          </div>
+
+          <div className="graph-holder">
             <div className="heading-row">
               <img
                 className="card-icon"
-                src="/assets/icons/total_inferences.jpg"
+                src="/assets/icons/avg_latency.jpg"
               ></img>
               <div className="card-info">
-                <p className="bodyText">Total Inferences</p>
-                <p className="subHeading2">
-                  Comparing latest versions of all model
-                </p>
+                <p className="bodyText">Latency Trends</p>
+                <p className="subHeading2">Last 20 Inferences</p>
               </div>
             </div>
-            <AnalyticsPieChart
-              trends={totalInferencesTrends}
-            ></AnalyticsPieChart>
+            <AnalyticsLineChart
+              trends={metrics["LatencyTrends"]}
+            ></AnalyticsLineChart>
           </div>
 
-          <div className="right-margin24"></div>
-
-          <div className="pie-graph-holder">
-            <div className="heading-row">
-              <img
-                className="card-icon"
-                src="/assets/icons/active_users.jpg"
-              ></img>
-              <div className="card-info">
-                <p className="bodyText">Active Users</p>
-                <p className="subHeading2">Across all the live models</p>
+          <div className="row-flex">
+            <div className="pie-graph-holder">
+              <div className="heading-row">
+                <img
+                  className="card-icon"
+                  src="/assets/icons/total_inferences.jpg"
+                ></img>
+                <div className="card-info">
+                  <p className="bodyText">Total Inferences</p>
+                  <p className="subHeading2">
+                    Comparing latest versions of all model
+                  </p>
+                </div>
               </div>
+              <AnalyticsPieChart
+                trends={metrics["totalInferenceTrends"]}
+              ></AnalyticsPieChart>
             </div>
-            <AnalyticsRadarChart
-              trends={activeUsersTrends}
-            ></AnalyticsRadarChart>
+
+            <div className="right-margin24"></div>
+
+            <div className="pie-graph-holder">
+              <div className="heading-row">
+                <img
+                  className="card-icon"
+                  src="/assets/icons/active_users.jpg"
+                ></img>
+                <div className="card-info">
+                  <p className="bodyText">Active Users</p>
+                  <p className="subHeading2">Across all the live models</p>
+                </div>
+              </div>
+              <AnalyticsRadarChart
+                trends={metrics["activeUsersTrends"]}
+              ></AnalyticsRadarChart>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
