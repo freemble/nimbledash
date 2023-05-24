@@ -25,7 +25,7 @@ function DashboardPage() {
   var [metrics, setMetrics] = useState({});
   var [modelJson, setModelJson] = useState({});
   var [selectedModelIndex, setSelectedModelIndex] = useState(0);
-  var selectedVersionIndex = 0;
+  var [selectedVersionIndex,setSelectedVersionIndex] = useState(0);
   const dispatch = useDispatch();
 
   var [isModalVisible, setModalVisiblity] = useState(true);
@@ -155,6 +155,7 @@ function DashboardPage() {
               <DropdownComponent
                 itemList={Object.keys(modelJson)}
                 customClass={"custom-dropdown"}
+                selectedItemIndex = {selectedModelIndex}
                 onChangeCallback={(modelIndex) => {
                   console.log("modelIndex", modelIndex);
                   if (modelIndex == 0) {
@@ -163,11 +164,13 @@ function DashboardPage() {
                     fetchMetrics(Object.keys(modelJson)[modelIndex], null);
                   }
                   setSelectedModelIndex(modelIndex);
+                  setSelectedVersionIndex(0);
                 }}
               ></DropdownComponent>
               <DropdownComponent
                 itemList={modelJson[Object.keys(modelJson)[selectedModelIndex]]}
                 customClass={"custom-dropdown"}
+                selectedItemIndex = {selectedVersionIndex}
                 onChangeCallback={(versionIndex) => {
                   if (selectedModelIndex == 0) {
                     fetchMetrics(null, null);
@@ -184,7 +187,7 @@ function DashboardPage() {
                       ]
                     );
                   }
-                  selectedVersionIndex = versionIndex;
+                  setSelectedVersionIndex(versionIndex);
                 }}
               ></DropdownComponent>
             </div>

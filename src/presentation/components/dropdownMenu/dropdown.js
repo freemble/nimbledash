@@ -8,7 +8,8 @@ function DropdownComponent(props) {
   var itemList = props.itemList;
   var customClass = props.customClass;
   var onChangeCallback = props.onChangeCallback;
-  var [selectedItemIndex, setSelectedItemIndex] = useState(0);
+  var selectedItemIndex = props.selectedItemIndex;
+  // var [selectedItemIndex, setSelectedItemIndex] = useState(0);
   return (
     <>
       <DropdownButton
@@ -21,7 +22,7 @@ function DropdownComponent(props) {
         bsPrefix={customClass + " " + "buttonText"}
         onSelect={(selected) => {
           onChangeCallback(parseInt(selected));
-          setSelectedItemIndex(parseInt(selected));
+          // setSelectedItemIndex(parseInt(selected));
         }}
       >
         {itemList.map((item, idx) => (
