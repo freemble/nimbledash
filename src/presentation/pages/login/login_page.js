@@ -81,7 +81,7 @@ function LoginPage() {
             />
           </div> */}
         </div>
-        <p className="clickableLink">Can't login? Contact us</p>
+        <a href="mailto:siddharth.mittal@nimbleedgehq.ai" className="clickableLink">Can't login? Contact us</a>
       </div>
     </div>
   );
