@@ -11,7 +11,9 @@ function InputModal(props) {
     event.preventDefault();
     var userInput = event.target.clientID.value;
     if (userInput == "") {
-      setModalErrorMessage("ClientID can't be null");
+      setModalErrorMessage("Client ID can't be null");
+    } else if (userInput == initValue) {
+      setModalErrorMessage("Please enter a different Client ID");
     } else {
       getInputCallback(userInput);
     }
@@ -25,7 +27,11 @@ function InputModal(props) {
           className="input-modal-close"
           src="assets/icons/close.svg"
           onClick={() => {
-            closeModalCallback();
+            if (initValue == "") {
+              setModalErrorMessage("Please enter a Client ID to proceed");
+            } else {
+              closeModalCallback();
+            }
           }}
         ></img>
         <p className="heading3">Enter clientID</p>
