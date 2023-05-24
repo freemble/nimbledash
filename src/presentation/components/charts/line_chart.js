@@ -21,6 +21,8 @@ function AnalyticsLineChart(props) {
     var modelKeys = Object.keys(trends);
     var maxLen = -1;
 
+    console.log(trends);
+
     modelKeys.forEach((key) => {
       if (trends[key].length > maxLen) maxLen = trends[key].length;
     });

@@ -113,7 +113,7 @@ function AdminPage() {
 
   return (
     <div className="adminPage">
-      <SideBar></SideBar>
+      {/* <SideBar></SideBar> */}
 
       <div className="admin-page-left-pane">
         <div className="page-title">

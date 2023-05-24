@@ -7,25 +7,25 @@ import { loaderActions } from "presentation/redux/stores/store";
 import { InfinitySpin } from "react-loader-spinner";
 import { useSelector } from "react-redux";
 import { ACCENT_COLOR } from "core/constants";
-import { ToastContainer } from 'react-toastify';
-
+import { ToastContainer } from "react-toastify";
+import SideBar from "presentation/components/sideBar/side_bar";
 
 function App() {
   return (
     <GoogleOAuthProvider clientId="405865671851-44bn30c6pc9ltep4ikkquabb1o9ajah3.apps.googleusercontent.com">
       <div className="App">
         <ToastContainer
-        position="bottom-center"
-        autoClose={1000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        limit={0}
+          position="bottom-center"
+          autoClose={1000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          limit={0}
         />
         {useSelector(
           (state) =>
@@ -36,6 +36,7 @@ function App() {
             <InfinitySpin color={ACCENT_COLOR}></InfinitySpin>
           </div>
         )}
+        <SideBar></SideBar>
         <AppRouter></AppRouter>
       </div>
     </GoogleOAuthProvider>

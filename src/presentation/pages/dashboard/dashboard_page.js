@@ -158,7 +158,6 @@ function DashboardPage() {
         ></InputModal>
       )}
 
-      <SideBar></SideBar>
 
       {Object.keys(metrics).length != 0 && (
         <div className="dashboard-content">

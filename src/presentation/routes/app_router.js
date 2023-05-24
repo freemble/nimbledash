@@ -21,20 +21,23 @@ function AppRouter(props) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-      dispatch(loaderActions.toggleLoader(true));
+    dispatch(loaderActions.toggleLoader(true));
 
-      var token = localStorage.getItem(ACCESS_TOKEN);
+    var token = localStorage.getItem(ACCESS_TOKEN);
 
-      isTokenValid(token).then((isValid) => {
-        if (isValid) {
+    isTokenValid(token).then((isValid) => {
+      if (isValid) {
+        if (!window.location.href.includes("/admin")) {
+          navigateTo(ADMIN_PAGE_ROUTE);
+        } else {
           navigateTo(DASHBOARD_PAGE_ROUTE);
-        } else if (!window.location.href.includes("/login")) {
-          localStorage.removeItem(CLIENT_ID);
-          navigateTo(LOGIN_PAGE_ROUTE);
         }
-      });
-      dispatch(loaderActions.toggleLoader(false));
-    
+      } else if (!window.location.href.includes("/login")) {
+        localStorage.removeItem(CLIENT_ID);
+        navigateTo(LOGIN_PAGE_ROUTE);
+      }
+    });
+    dispatch(loaderActions.toggleLoader(false));
   }, []);
 
   const isTokenValid = async (token) => {
