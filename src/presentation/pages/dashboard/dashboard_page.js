@@ -25,7 +25,7 @@ function DashboardPage() {
   var [metrics, setMetrics] = useState({});
   var [modelJson, setModelJson] = useState({});
   var [selectedModelIndex, setSelectedModelIndex] = useState(0);
-  var [selectedVersionIndex,setSelectedVersionIndex] = useState(0);
+  var [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
   const dispatch = useDispatch();
 
   var [isModalVisible, setModalVisiblity] = useState(true);
@@ -66,10 +66,12 @@ function DashboardPage() {
       .catch((e) => {
         console.log(e);
         toast.error("Something Went Wrong.");
+        dispatch(loaderActions.toggleLoader(false));
       });
   };
 
   const fetchModelList = async () => {
+    toast("Fetching data", { autoClose: 100 });
     var tempJson = {};
     await axios
       .get("http://localhost:8010/proxy/mds/api/v1/admin/models", {
@@ -97,11 +99,10 @@ function DashboardPage() {
         console.log(e);
         toast.error("Something Went Wrong.");
       });
-    dispatch(loaderActions.toggleLoader(false));
   };
 
   const fetchMetrics = async (modelName, versionName) => {
-    console.log("in function", modelName, versionName);
+    // toast("Fetching data",{autoClose : 100});
     var uri = "";
     if (modelName == null && versionName == null) {
       uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/inference`;
@@ -123,6 +124,8 @@ function DashboardPage() {
         setMetrics(res.data);
       })
       .catch((e) => {});
+
+    dispatch(loaderActions.toggleLoader(false));
   };
 
   return (
@@ -155,7 +158,7 @@ function DashboardPage() {
               <DropdownComponent
                 itemList={Object.keys(modelJson)}
                 customClass={"custom-dropdown"}
-                selectedItemIndex = {selectedModelIndex}
+                selectedItemIndex={selectedModelIndex}
                 onChangeCallback={(modelIndex) => {
                   console.log("modelIndex", modelIndex);
                   if (modelIndex == 0) {
@@ -170,7 +173,7 @@ function DashboardPage() {
               <DropdownComponent
                 itemList={modelJson[Object.keys(modelJson)[selectedModelIndex]]}
                 customClass={"custom-dropdown"}
-                selectedItemIndex = {selectedVersionIndex}
+                selectedItemIndex={selectedVersionIndex}
                 onChangeCallback={(versionIndex) => {
                   if (selectedModelIndex == 0) {
                     fetchMetrics(null, null);
