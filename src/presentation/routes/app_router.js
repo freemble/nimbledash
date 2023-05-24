@@ -10,7 +10,7 @@ import LoginPage from "presentation/pages/login/login_page";
 import DashboardPage from "presentation/pages/dashboard/dashboard_page";
 import InputModal from "presentation/components/inputModal/inputModal";
 import AdminPage from "presentation/pages/admin/admin_page";
-import { ACCESS_TOKEN } from "core/constants";
+import { ACCESS_TOKEN, CLIENT_ID } from "core/constants";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -21,9 +21,6 @@ function AppRouter(props) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // if (window.location.href.includes("/admin"))
-      // navigateTo(ADMIN_PAGE_ROUTE);
-    // else {
       dispatch(loaderActions.toggleLoader(true));
 
       var token = localStorage.getItem(ACCESS_TOKEN);
@@ -32,10 +29,10 @@ function AppRouter(props) {
         if (isValid) {
           navigateTo(DASHBOARD_PAGE_ROUTE);
         } else if (!window.location.href.includes("/login")) {
+          localStorage.removeItem(CLIENT_ID);
           navigateTo(LOGIN_PAGE_ROUTE);
         }
       });
-    // }
       dispatch(loaderActions.toggleLoader(false));
     
   }, []);

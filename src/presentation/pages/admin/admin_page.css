@@ -14,8 +14,8 @@
 }
 
 .model-holder-card {
-  padding: 8px 20px;
-  background: rgba(101, 101, 255, 0.6);
+  padding: 12px 20px;
+  background: rgba(101, 101, 255, 0.8);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -38,6 +38,7 @@
 .upload-card {
   background: rgba(101, 101, 255, 0.1);
   border-radius: 8px;
+  grid-column: 1/3;
   position: relative;
 }
 

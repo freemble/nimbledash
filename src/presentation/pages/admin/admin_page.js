@@ -6,12 +6,14 @@ import { useFilePicker } from "use-file-picker";
 import { encode as base64_encode } from "base-64";
 import { Buffer } from "buffer";
 import { Base64 } from "js-base64";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ACCESS_TOKEN, CLIENT_ID, USER_EMAIL } from "core/constants";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { loaderActions } from "presentation/redux/stores/store";
 
 function AdminPage() {
+  const dispatch = useDispatch();
   var modelContentBase64 = "";
   var modelConfigJson = {};
   const uploadType = ["New Model", "Build", "Update", "Fix"];
@@ -35,6 +37,8 @@ function AdminPage() {
   }, []);
 
   const fetchModelList = async () => {
+    dispatch(loaderActions.toggleLoader(true));
+
     await axios
       .get("http://localhost:8010/proxy/mds/api/v1/admin/models", {
         headers: {
@@ -52,6 +56,8 @@ function AdminPage() {
         if (errorDescription != null) toast.error(errorDescription);
         else toast.error("Something Went Wrong.");
       });
+      dispatch(loaderActions.toggleLoader(false));
+
   };
 
   filesContent.map((file, index) => {
@@ -59,7 +65,7 @@ function AdminPage() {
       const binary8 = new Uint8Array(file.content);
       modelContentBase64 = Buffer.from(binary8).toString("base64");
     } else {
-      modelConfigJson = JSON.parse(new TextDecoder().decode(file.content))
+      modelConfigJson = JSON.parse(new TextDecoder().decode(file.content));
       console.log(modelConfigJson);
     }
   });
@@ -92,7 +98,7 @@ function AdminPage() {
               }
             )
             .then((res) => {
-              toast.success("Model uploaded successfully")
+              toast.success("Model uploaded successfully");
             })
             .catch((e) => {
               console.log(e);
@@ -111,8 +117,8 @@ function AdminPage() {
 
       <div className="admin-page-left-pane">
         <div className="page-title">
-          <p className="heading3">Dashboard</p>
-          <p className="subHeading">Live Analytical Updates.</p>
+          <p className="heading3">Admin Panel</p>
+          <p className="subHeading">Manage Your ML Models.</p>
         </div>
 
         <p className="heading4 pane-title">Your uploads.</p>
@@ -156,26 +162,11 @@ function AdminPage() {
           >
             <div className="upload-card-content">
               <img src="/assets/icons/upload.svg"></img>
-              <p className="heading6 margin-top-8">Upload Model</p>
+              <p className="heading6 margin-top-8">Upload Model & Config</p>
               <p className="subHeading2">Max upload size is 20 MBs</p>
             </div>
           </div>
-          <div
-            className="upload-card clickable"
-            onClick={async () => {
-              try {
-                await openConfigSelector();
-              } catch (err) {
-                console.log("can't open file picker.");
-              }
-            }}
-          >
-            <div className="upload-card-content">
-              <img src="/assets/icons/upload.svg"></img>
-              <p className="heading6 margin-top-8">Upload Config</p>
-              <p className="subHeading2">Max upload size is 1 MB</p>
-            </div>
-          </div>
+
           <DropdownComponent
             selectedItemIndex={selectedUploadTypeIndex}
             onChangeCallback={(selectedIndex) => {

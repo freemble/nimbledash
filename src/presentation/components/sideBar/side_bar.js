@@ -1,3 +1,4 @@
+import { ACCESS_TOKEN, CLIENT_ID, USER_EMAIL } from "core/constants";
 import { ADMIN_PAGE_ROUTE } from "presentation/routes/route-paths";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -26,7 +27,15 @@ function SideBar() {
           <img className="sidebar-icon" src="/assets/icons/admin.svg"></img>
           <p className="sidebar-item-desc">Upload model</p>
         </div>
-        <div className="sidebar-item">
+        <div
+          className="sidebar-item"
+          onClick={() => {
+            localStorage.removeItem(ACCESS_TOKEN);
+            localStorage.removeItem(USER_EMAIL);
+            localStorage.removeItem(CLIENT_ID);
+            window.location.reload();
+          }}
+        >
           <img className="sidebar-icon" src="/assets/icons/logout.svg"></img>
           <p className="sidebar-item-desc">Logout</p>
         </div>

@@ -17,7 +17,10 @@ import SideBar from "presentation/components/sideBar/side_bar";
 import axios from "axios";
 import { ACCESS_TOKEN, USER_EMAIL, CLIENT_ID } from "core/constants";
 import { useDispatch } from "react-redux";
-import { dashboardActions, loaderActions } from "presentation/redux/stores/store";
+import {
+  dashboardActions,
+  loaderActions,
+} from "presentation/redux/stores/store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -32,7 +35,6 @@ function DashboardPage() {
   var [clientID, setClientID] = useState("");
 
   const handleClientIDChange = (input) => {
-    dispatch(loaderActions.toggleLoader(true));
     setClientID(input);
   };
 
@@ -41,6 +43,13 @@ function DashboardPage() {
   };
 
   useEffect(() => {
+    dispatch(loaderActions.toggleLoader(true));
+    var cachedClientId = localStorage.getItem(CLIENT_ID);
+    if (clientID == "" && cachedClientId != null) {
+      setClientID(cachedClientId);
+    } else if (clientID == "") {
+      dispatch(loaderActions.toggleLoader(false));
+    }
     if (clientID != "") {
       validateCliendID();
     }
@@ -87,6 +96,7 @@ function DashboardPage() {
         },
       })
       .then((res) => {
+        tempJson["All Models"] = ["Latest"];
         res.data.models.forEach((modelNameVersionMap) => {
           var key = modelNameVersionMap.modelName;
           if (tempJson.hasOwnProperty(key)) {
@@ -96,7 +106,6 @@ function DashboardPage() {
           }
         });
         // dispatch(dashboardActions.setModels(tempJson));
-        tempJson["All Models"] = ["Latest"];
         fetchMetrics(null, null);
         setModelJson(tempJson);
       })
@@ -241,7 +250,7 @@ function DashboardPage() {
               cardIconAddress="/assets/icons/avg_latency.jpg"
               cardInfoTitle="Average Latency"
               cardInfoSubtitle="Per Day"
-              cardText={metrics["averageLatency"]}
+              cardText={metrics["averageLatency"].toFixed(2)}
               cardSubText="milliseconds"
             ></DashboardCard>
           </div>
