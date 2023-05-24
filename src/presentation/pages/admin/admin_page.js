@@ -1,37 +1,107 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./admin_page.css";
 import DropdownComponent from "presentation/components/dropdownMenu/dropdown";
 import SideBar from "presentation/components/sideBar/side_bar";
 import { useFilePicker } from "use-file-picker";
-import {encode as base64_encode} from 'base-64';
+import { encode as base64_encode } from "base-64";
+import { Buffer } from "buffer";
+import { Base64 } from "js-base64";
+import { useSelector } from "react-redux";
+import { ACCESS_TOKEN, CLIENT_ID, USER_EMAIL } from "core/constants";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function AdminPage() {
-  var modelName = "";
   var modelContentBase64 = "";
   var modelConfigJson = {};
   const uploadType = ["New Model", "Build", "Update", "Fix"];
-  const [selectedUploadType, setSelectedUploadType] = useState(uploadType[0]);
-  const [openModelSelector, { filesContent, loading }] = useFilePicker({
-    accept: ".onnx",
+  const [selectedUploadTypeIndex, setSelectedUploadTypeIndex] = useState(0);
+  const [selectedModelIndex, setSelectedModelIndex] = useState(0);
+  const [modelList, setModelList] = useState([]);
+  const [openFileSelector, { filesContent, loading }] = useFilePicker({
+    accept: [".onnx", ".json"],
+    readAs: "ArrayBuffer",
+    multiple: true,
+    limitFilesConfig: { max: 2, min: 2 },
+  });
+  const [openConfigSelector] = useFilePicker({
+    accept: ".json",
+    readAs: "Text",
+    multiple: false,
   });
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    fetchModelList();
+  }, []);
 
-  if (filesContent.length != 0) {
-    console.log(filesContent[0]["content"]);
-    modelContentBase64 = base64_encode(filesContent[0]["content"]);
-    console.log(modelContentBase64);
-  }
+  const fetchModelList = async () => {
+    await axios
+      .get("http://localhost:8010/proxy/mds/api/v1/admin/models", {
+        headers: {
+          clientid: localStorage.getItem(CLIENT_ID),
+          tokenid: localStorage.getItem(USER_EMAIL),
+          SsoToken: localStorage.getItem(ACCESS_TOKEN),
+        },
+      })
+      .then((res) => {
+        setModelList(res.data.models);
+      })
+      .catch((e) => {
+        console.log(e);
+        var errorDescription = e.response.data?.error?.description;
+        if (errorDescription != null) toast.error(errorDescription);
+        else toast.error("Something Went Wrong.");
+      });
+  };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    var userInput = event.target.clientID.value;
-    if (userInput == "") {
-      //   setModalErrorMessage("ClientID can't be null");
+  filesContent.map((file, index) => {
+    if (file["name"].includes(".onnx")) {
+      const binary8 = new Uint8Array(file.content);
+      modelContentBase64 = Buffer.from(binary8).toString("base64");
     } else {
-      //   getInputCallback(userInput);
+      modelConfigJson = JSON.parse(new TextDecoder().decode(file.content))
+      console.log(modelConfigJson);
+    }
+  });
+
+  const uploadModel = async () => {
+    const modelName = document.getElementById("modelNameInput").value;
+    if (modelContentBase64 == "") {
+      toast.error("Please select a valid model");
+    } else if (Object.keys(modelConfigJson).length == 0) {
+      toast.error("Please select a valid model config");
+    } else {
+      if (selectedUploadTypeIndex == 0) {
+        if (modelName == null || modelName == "") {
+          toast.error("Please enter a valid model name");
+        } else {
+          await axios
+            .post(
+              "http://localhost:8010/proxy/mds/api/v1/admin/model",
+              {
+                modelConfig: modelConfigJson,
+                modelName: modelName,
+                model: modelContentBase64,
+              },
+              {
+                headers: {
+                  clientid: localStorage.getItem(CLIENT_ID),
+                  tokenid: localStorage.getItem(USER_EMAIL),
+                  SsoToken: localStorage.getItem(ACCESS_TOKEN),
+                },
+              }
+            )
+            .then((res) => {
+              toast.success("Model uploaded successfully")
+            })
+            .catch((e) => {
+              console.log(e);
+              var errorDescription = e.response.data?.error?.description;
+              if (errorDescription != null) toast.error(errorDescription);
+              else toast.error("Something Went Wrong.");
+            });
+        }
+      }
     }
   };
 
@@ -46,38 +116,24 @@ function AdminPage() {
         </div>
 
         <p className="heading4 pane-title">Your uploads.</p>
-        <div className="model-holder-card">
-          <div className="left-content">
-            <p className="heading5">nadaan_parindey</p>
-            <p className="subHeading3">v4.0</p>
-          </div>
-          <div className="right-content">
-            <img className="clickable" src="/assets/icons/download_model.svg"></img>
-          </div>
-        </div>
 
-        <div className="model-holder-card">
-          <div className="left-content">
-            <p className="heading5">nadaan_parindey</p>
-            <p className="subHeading3">v4.0</p>
+        {modelList.map((item, index) => (
+          <div className="model-holder-card">
+            <div className="left-content">
+              <p className="heading5">{item.modelName}</p>
+              <p className="subHeading3">{item.modelVersion}</p>
+            </div>
+            <div className="right-content">
+              <img
+                className="clickable"
+                src="/assets/icons/download_model.svg"
+              ></img>
+            </div>
           </div>
-          <div className="right-content">
-            <img src="/assets/icons/download_model.svg"></img>
-          </div>
-        </div>
-
-        <div className="model-holder-card">
-          <div className="left-content">
-            <p className="heading5">nadaan_parindey</p>
-            <p className="subHeading3">v4.0</p>
-          </div>
-          <div className="right-content">
-            <img src="/assets/icons/download_model.svg"></img>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="divider"></div>
+      <div className="divider flex-vertical"></div>
 
       <div className="admin-page-right-pane">
         <div className="page-title invisible">
@@ -92,9 +148,7 @@ function AdminPage() {
             className="upload-card clickable"
             onClick={async () => {
               try {
-                const selectedModel = await openModelSelector();
-                // console.log(selectedModel);
-                // console.log(filesContent);
+                await openFileSelector();
               } catch (err) {
                 console.log("can't open file picker.");
               }
@@ -106,7 +160,16 @@ function AdminPage() {
               <p className="subHeading2">Max upload size is 20 MBs</p>
             </div>
           </div>
-          <div className="upload-card clickable">
+          <div
+            className="upload-card clickable"
+            onClick={async () => {
+              try {
+                await openConfigSelector();
+              } catch (err) {
+                console.log("can't open file picker.");
+              }
+            }}
+          >
             <div className="upload-card-content">
               <img src="/assets/icons/upload.svg"></img>
               <p className="heading6 margin-top-8">Upload Config</p>
@@ -114,15 +177,17 @@ function AdminPage() {
             </div>
           </div>
           <DropdownComponent
+            selectedItemIndex={selectedUploadTypeIndex}
             onChangeCallback={(selectedIndex) => {
-              setSelectedUploadType(uploadType[selectedIndex]);
+              setSelectedUploadTypeIndex(selectedIndex);
             }}
             itemList={uploadType}
             customClass={"model-upload-custom-dropdown"}
           ></DropdownComponent>
-          {selectedUploadType == "New Model" && (
-            <form className="expanded" onSubmit={handleSubmit}>
+          {selectedUploadTypeIndex == 0 && (
+            <form className="expanded">
               <input
+                id="modelNameInput"
                 type="text"
                 name="clientID"
                 className="model-upload-custom-dropdown"
@@ -130,14 +195,18 @@ function AdminPage() {
               />
             </form>
           )}
-          {selectedUploadType != "New Model" && (
+          {selectedUploadTypeIndex != 0 && (
             <DropdownComponent
-              itemList={["Select Model", "some"]}
+              selectedItemIndex={selectedModelIndex}
+              itemList={modelList.map((item) => item.modelName)}
+              onChangeCallback={(selectedIndex) => {
+                setSelectedModelIndex(selectedIndex);
+              }}
               customClass={"model-upload-custom-dropdown"}
             ></DropdownComponent>
           )}
         </div>
-        <div className="upload-button clickable">
+        <div className="upload-button clickable" onClick={uploadModel}>
           <p className="buttonText center-text">Upload</p>
         </div>
       </div>

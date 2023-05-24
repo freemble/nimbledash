@@ -1,6 +1,11 @@
+import { ADMIN_PAGE_ROUTE } from "presentation/routes/route-paths";
 import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function SideBar() {
+  const navigateTo = useNavigate();
+
   return (
     <div className="sidebar">
       <div className="sidebar-margin">
@@ -12,7 +17,12 @@ function SideBar() {
           ></img>
           <p className="sidebar-item-desc selected-desc">Dashboard</p>
         </div>
-        <div className="sidebar-item">
+        <div
+          className="sidebar-item clickable"
+          onClick={() => {
+            navigateTo(ADMIN_PAGE_ROUTE);
+          }}
+        >
           <img className="sidebar-icon" src="/assets/icons/admin.svg"></img>
           <p className="sidebar-item-desc">Upload model</p>
         </div>

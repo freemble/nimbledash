@@ -14,7 +14,7 @@
 }
 
 .model-holder-card {
-  padding: 12px 28px;
+  padding: 8px 20px;
   background: rgba(101, 101, 255, 0.6);
   border-radius: 4px;
   display: flex;
@@ -105,4 +105,7 @@
     background-color: transparent;
     margin: auto 0;
 
+}
+
+.flex-vertical{
 }

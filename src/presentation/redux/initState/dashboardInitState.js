@@ -1,4 +1,3 @@
 export const dashboardInitState = {
-    modelIDs:[],
-    modelVersions:[]
+    models:[],
 }

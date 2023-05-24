@@ -15,9 +15,9 @@ import InputModal from "../../components/inputModal/inputModal";
 import { getRequest } from "data/remote_datasource";
 import SideBar from "presentation/components/sideBar/side_bar";
 import axios from "axios";
-import { ACCESS_TOKEN, USER_EMAIL } from "core/constants";
+import { ACCESS_TOKEN, USER_EMAIL, CLIENT_ID } from "core/constants";
 import { useDispatch } from "react-redux";
-import { loaderActions } from "presentation/redux/stores/store";
+import { dashboardActions, loaderActions } from "presentation/redux/stores/store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -57,6 +57,7 @@ function DashboardPage() {
       )
       .then((res) => {
         if (res.data["permission"] == "read_write") {
+          localStorage.setItem(CLIENT_ID, clientID);
           fetchModelList();
           setModalVisiblity(false);
         } else {
@@ -65,7 +66,11 @@ function DashboardPage() {
       })
       .catch((e) => {
         console.log(e);
-        toast.error("Something Went Wrong.");
+
+        var errorDescription = e.response.data?.error?.description;
+        if (errorDescription != null) toast.error(errorDescription);
+        else toast.error("Something Went Wrong.");
+
         dispatch(loaderActions.toggleLoader(false));
       });
   };
@@ -82,7 +87,6 @@ function DashboardPage() {
         },
       })
       .then((res) => {
-        tempJson["All Models"] = ["Latest"];
         res.data.models.forEach((modelNameVersionMap) => {
           var key = modelNameVersionMap.modelName;
           if (tempJson.hasOwnProperty(key)) {
@@ -91,13 +95,16 @@ function DashboardPage() {
             tempJson[key] = ["All Versions", modelNameVersionMap.modelVersion];
           }
         });
-        console.log(tempJson);
+        // dispatch(dashboardActions.setModels(tempJson));
+        tempJson["All Models"] = ["Latest"];
         fetchMetrics(null, null);
         setModelJson(tempJson);
       })
       .catch((e) => {
         console.log(e);
-        toast.error("Something Went Wrong.");
+        var errorDescription = e.response.data?.error?.description;
+        if (errorDescription != null) toast.error(errorDescription);
+        else toast.error("Something Went Wrong.");
       });
   };
 
@@ -123,7 +130,11 @@ function DashboardPage() {
         console.log(res.data);
         setMetrics(res.data);
       })
-      .catch((e) => {});
+      .catch((e) => {
+        var errorDescription = e.response.data?.error?.description;
+        if (errorDescription != null) toast.error(errorDescription);
+        else toast.error("Something Went Wrong.");
+      });
 
     dispatch(loaderActions.toggleLoader(false));
   };
