@@ -61,24 +61,23 @@ function AdminPage() {
     dispatch(loaderActions.toggleLoader(false));
   };
 
-  filesContent.map((file, index) => {
+  filesContent.map((file) => {
     if (file["name"].includes(".onnx")) {
       const binary8 = new Uint8Array(file.content);
       modelContentBase64 = Buffer.from(binary8).toString("base64");
     } else {
       modelConfigJson = JSON.parse(new TextDecoder().decode(file.content));
-      console.log(modelConfigJson);
     }
   });
 
   const uploadModel = async () => {
-    const modelName = document.getElementById("modelNameInput").value;
     if (modelContentBase64 == "") {
       toast.error("Please select a valid model");
     } else if (Object.keys(modelConfigJson).length == 0) {
       toast.error("Please select a valid model config");
     } else {
       if (selectedUploadTypeIndex == 0) {
+        const modelName = document.getElementById("modelNameInput").value;
         if (modelName == null || modelName == "") {
           toast.error("Please enter a valid model name");
         } else {
@@ -110,13 +109,41 @@ function AdminPage() {
               else toast.error("Something Went Wrong.");
             });
         }
+      } else {
+        dispatch(loaderActions.toggleLoader(true));
+        await axios
+          .put(
+            "http://localhost:8010/proxy/mds/api/v1/admin/model",
+            {
+              modelConfig: modelConfigJson,
+              modelName: modelList[selectedModelIndex].modelName,
+              model: modelContentBase64,
+              updateType: selectedUploadTypeIndex,
+            },
+            {
+              headers: {
+                clientid: localStorage.getItem(CLIENT_ID),
+                tokenid: localStorage.getItem(USER_EMAIL),
+                SsoToken: localStorage.getItem(ACCESS_TOKEN),
+              },
+            }
+          )
+          .then((res) => {
+            toast.success("Model updated successfully");
+            fetchModelList();
+          })
+          .catch((e) => {
+            console.log(e);
+            var errorDescription = e.response.data?.error?.description;
+            if (errorDescription != null) toast.error(errorDescription);
+            else toast.error("Something Went Wrong.");
+          });
       }
     }
     dispatch(loaderActions.toggleLoader(false));
   };
 
   const downloadModel = async (modelName, modelVersion) => {
-    toast("Starting download");
     await axios
       .get(
         `http://localhost:8010/proxy/mds/api/v1/admin/models/${modelName}/versions/${modelVersion}`,
@@ -129,10 +156,10 @@ function AdminPage() {
         }
       )
       .then((res) => {
-        var modelB64 = res.data.model;
-        var modelConfig = res.data.modelConfig;
+        toast.success("Download started");
 
-        var modelBinary = new Uint8Array(base64ToArrayBuffer(modelB64));
+        var modelBinary = new Uint8Array(base64ToArrayBuffer(res.data.model));
+        var modelConfig = res.data.modelConfig;
 
         saveFile(
           modelBinary,
@@ -145,7 +172,6 @@ function AdminPage() {
           "application/json",
           modelName + "_" + modelVersion + ".json"
         );
-
       })
       .catch((e) => {
         console.log(e);
@@ -180,8 +206,6 @@ function AdminPage() {
 
   return (
     <div className="adminPage">
-      {/* <SideBar></SideBar> */}
-
       <div className="admin-page-left-pane">
         <div className="page-title">
           <p className="heading3">Admin Panel</p>
@@ -267,7 +291,9 @@ function AdminPage() {
           {selectedUploadTypeIndex != 0 && (
             <DropdownComponent
               selectedItemIndex={selectedModelIndex}
-              itemList={modelList.map((item) => item.modelName)}
+              itemList={Array.from(
+                new Set(modelList.map((item) => item.modelName))
+              )}
               onChangeCallback={(selectedIndex) => {
                 setSelectedModelIndex(selectedIndex);
               }}

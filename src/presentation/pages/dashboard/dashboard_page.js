@@ -121,11 +121,11 @@ function DashboardPage() {
     // toast("Fetching data",{autoClose : 100});
     var uri = "";
     if (modelName == null && versionName == null) {
-      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/inference`;
+      uri = `http://localhost:8010/proxy/dms/api/v1/metrics/clients/${clientID}/inference`;
     } else if (modelName != null && versionName == null) {
-      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/inference`;
+      uri = `http://localhost:8010/proxy/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/inference`;
     } else if (modelName != null && versionName != null) {
-      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/versions/${versionName}/inference`;
+      uri = `http://localhost:8010/proxy/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/versions/${versionName}/inference`;
     }
     console.log("request uri is", uri);
     await axios
