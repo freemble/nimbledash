@@ -31,6 +31,7 @@ function AdminPage() {
     readAs: "Text",
     multiple: false,
   });
+  var filesNames = [];
 
   useEffect(() => {
     fetchModelList();
@@ -56,11 +57,11 @@ function AdminPage() {
         if (errorDescription != null) toast.error(errorDescription);
         else toast.error("Something Went Wrong.");
       });
-      dispatch(loaderActions.toggleLoader(false));
-
+    dispatch(loaderActions.toggleLoader(false));
   };
 
   filesContent.map((file, index) => {
+    filesNames.push(file.name);
     if (file["name"].includes(".onnx")) {
       const binary8 = new Uint8Array(file.content);
       modelContentBase64 = Buffer.from(binary8).toString("base64");
@@ -163,7 +164,14 @@ function AdminPage() {
             <div className="upload-card-content">
               <img src="/assets/icons/upload.svg"></img>
               <p className="heading6 margin-top-8">Upload Model & Config</p>
-              <p className="subHeading2">Max upload size is 20 MBs</p>
+              {modelContentBase64 != "" &&
+              Object.keys(modelConfigJson).length != 0 ? (
+                <p className="subHeading2 selected-files">
+                  Selected files: [{filesNames}]
+                </p>
+              ) : (
+                <p className="subHeading2">Max upload size is 20 MBs</p>
+              )}
             </div>
           </div>
 
