@@ -31,7 +31,6 @@ function AdminPage() {
     readAs: "Text",
     multiple: false,
   });
-  var filesNames = [];
 
   useEffect(() => {
     fetchModelList();
@@ -49,7 +48,9 @@ function AdminPage() {
         },
       })
       .then((res) => {
-        setModelList(res.data.models);
+        var listOfModels = res.data.models;
+        listOfModels.reverse();
+        setModelList(listOfModels);
       })
       .catch((e) => {
         console.log(e);
@@ -61,7 +62,6 @@ function AdminPage() {
   };
 
   filesContent.map((file, index) => {
-    filesNames.push(file.name);
     if (file["name"].includes(".onnx")) {
       const binary8 = new Uint8Array(file.content);
       modelContentBase64 = Buffer.from(binary8).toString("base64");
@@ -82,6 +82,7 @@ function AdminPage() {
         if (modelName == null || modelName == "") {
           toast.error("Please enter a valid model name");
         } else {
+          dispatch(loaderActions.toggleLoader(true));
           await axios
             .post(
               "http://localhost:8010/proxy/mds/api/v1/admin/model",
@@ -100,6 +101,7 @@ function AdminPage() {
             )
             .then((res) => {
               toast.success("Model uploaded successfully");
+              fetchModelList();
             })
             .catch((e) => {
               console.log(e);
@@ -110,7 +112,71 @@ function AdminPage() {
         }
       }
     }
+    dispatch(loaderActions.toggleLoader(false));
   };
+
+  const downloadModel = async (modelName, modelVersion) => {
+    toast("Starting download");
+    await axios
+      .get(
+        `http://localhost:8010/proxy/mds/api/v1/admin/models/${modelName}/versions/${modelVersion}`,
+        {
+          headers: {
+            clientid: localStorage.getItem(CLIENT_ID),
+            tokenid: localStorage.getItem(USER_EMAIL),
+            SsoToken: localStorage.getItem(ACCESS_TOKEN),
+          },
+        }
+      )
+      .then((res) => {
+        var modelB64 = res.data.model;
+        var modelConfig = res.data.modelConfig;
+
+        var modelBinary = new Uint8Array(base64ToArrayBuffer(modelB64));
+
+        saveFile(
+          modelBinary,
+          "application/octet-stream",
+          modelName + "_" + modelVersion + ".onnx"
+        );
+
+        saveFile(
+          JSON.stringify(modelConfig),
+          "application/json",
+          modelName + "_" + modelVersion + ".json"
+        );
+
+      })
+      .catch((e) => {
+        console.log(e);
+        var errorDescription = e.response.data?.error?.description;
+        if (errorDescription != null) toast.error(errorDescription);
+        else toast.error("Something Went Wrong.");
+      });
+  };
+
+  const saveFile = async (file, fileType, fileName) => {
+    const blob = new Blob([file], {
+      type: fileType,
+    });
+
+    const a = document.createElement("a");
+    a.download = fileName;
+    a.href = URL.createObjectURL(blob);
+    a.addEventListener("click", (e) => {
+      setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
+    });
+    a.click();
+  };
+
+  function base64ToArrayBuffer(base64) {
+    var binaryString = atob(base64);
+    var bytes = new Uint8Array(binaryString.length);
+    for (var i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
 
   return (
     <div className="adminPage">
@@ -130,7 +196,10 @@ function AdminPage() {
               <p className="heading5">{item.modelName}</p>
               <p className="subHeading3">{item.modelVersion}</p>
             </div>
-            <div className="right-content">
+            <div
+              className="right-content"
+              onClick={() => downloadModel(item.modelName, item.modelVersion)}
+            >
               <img
                 className="clickable"
                 src="/assets/icons/download_model.svg"
@@ -167,7 +236,8 @@ function AdminPage() {
               {modelContentBase64 != "" &&
               Object.keys(modelConfigJson).length != 0 ? (
                 <p className="subHeading2 selected-files">
-                  Selected files: [{filesNames}]
+                  Selected files: [{filesContent[0].name},{" "}
+                  {filesContent[1].name}]
                 </p>
               ) : (
                 <p className="subHeading2">Max upload size is 20 MBs</p>
