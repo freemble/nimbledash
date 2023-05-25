@@ -7,7 +7,12 @@ import { encode as base64_encode } from "base-64";
 import { Buffer } from "buffer";
 import { Base64 } from "js-base64";
 import { useDispatch, useSelector } from "react-redux";
-import { ACCESS_TOKEN, CLIENT_ID, USER_EMAIL } from "core/constants";
+import {
+  ACCESS_TOKEN,
+  APP_BASE_URL,
+  CLIENT_ID,
+  USER_EMAIL,
+} from "core/constants";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { loaderActions } from "presentation/redux/stores/store";
@@ -31,7 +36,6 @@ function AdminPage() {
     readAs: "Text",
     multiple: false,
   });
-  var filesNames = [];
 
   useEffect(() => {
     fetchModelList();
@@ -41,7 +45,7 @@ function AdminPage() {
     dispatch(loaderActions.toggleLoader(true));
 
     await axios
-      .get("http://localhost:8010/proxy/mds/api/v1/admin/models", {
+      .get(`${APP_BASE_URL}/mds/api/v1/admin/models`, {
         headers: {
           clientid: localStorage.getItem(CLIENT_ID),
           tokenid: localStorage.getItem(USER_EMAIL),
@@ -49,7 +53,9 @@ function AdminPage() {
         },
       })
       .then((res) => {
-        setModelList(res.data.models);
+        var listOfModels = res.data.models;
+        listOfModels.reverse();
+        setModelList(listOfModels);
       })
       .catch((e) => {
         console.log(e);
@@ -60,31 +66,30 @@ function AdminPage() {
     dispatch(loaderActions.toggleLoader(false));
   };
 
-  filesContent.map((file, index) => {
-    filesNames.push(file.name);
+  filesContent.map((file) => {
     if (file["name"].includes(".onnx")) {
       const binary8 = new Uint8Array(file.content);
       modelContentBase64 = Buffer.from(binary8).toString("base64");
     } else {
       modelConfigJson = JSON.parse(new TextDecoder().decode(file.content));
-      console.log(modelConfigJson);
     }
   });
 
   const uploadModel = async () => {
-    const modelName = document.getElementById("modelNameInput").value;
     if (modelContentBase64 == "") {
       toast.error("Please select a valid model");
     } else if (Object.keys(modelConfigJson).length == 0) {
       toast.error("Please select a valid model config");
     } else {
       if (selectedUploadTypeIndex == 0) {
+        const modelName = document.getElementById("modelNameInput").value;
         if (modelName == null || modelName == "") {
           toast.error("Please enter a valid model name");
         } else {
+          dispatch(loaderActions.toggleLoader(true));
           await axios
             .post(
-              "http://localhost:8010/proxy/mds/api/v1/admin/model",
+              `${APP_BASE_URL}/mds/api/v1/admin/model`,
               {
                 modelConfig: modelConfigJson,
                 modelName: modelName,
@@ -100,6 +105,7 @@ function AdminPage() {
             )
             .then((res) => {
               toast.success("Model uploaded successfully");
+              fetchModelList();
             })
             .catch((e) => {
               console.log(e);
@@ -108,14 +114,103 @@ function AdminPage() {
               else toast.error("Something Went Wrong.");
             });
         }
+      } else {
+        dispatch(loaderActions.toggleLoader(true));
+        await axios
+          .put(
+            `${APP_BASE_URL}/mds/api/v1/admin/model`,
+            {
+              modelConfig: modelConfigJson,
+              modelName: modelList[selectedModelIndex].modelName,
+              model: modelContentBase64,
+              updateType: selectedUploadTypeIndex,
+            },
+            {
+              headers: {
+                clientid: localStorage.getItem(CLIENT_ID),
+                tokenid: localStorage.getItem(USER_EMAIL),
+                SsoToken: localStorage.getItem(ACCESS_TOKEN),
+              },
+            }
+          )
+          .then((res) => {
+            toast.success("Model updated successfully");
+            fetchModelList();
+          })
+          .catch((e) => {
+            console.log(e);
+            var errorDescription = e.response.data?.error?.description;
+            if (errorDescription != null) toast.error(errorDescription);
+            else toast.error("Something Went Wrong.");
+          });
       }
     }
+    dispatch(loaderActions.toggleLoader(false));
   };
+
+  const downloadModel = async (modelName, modelVersion) => {
+    await axios
+      .get(
+        `${APP_BASE_URL}/mds/api/v1/admin/models/${modelName}/versions/${modelVersion}`,
+        {
+          headers: {
+            clientid: localStorage.getItem(CLIENT_ID),
+            tokenid: localStorage.getItem(USER_EMAIL),
+            SsoToken: localStorage.getItem(ACCESS_TOKEN),
+          },
+        }
+      )
+      .then((res) => {
+        toast.success("Download started");
+
+        var modelBinary = new Uint8Array(base64ToArrayBuffer(res.data.model));
+        var modelConfig = res.data.modelConfig;
+
+        saveFile(
+          modelBinary,
+          "application/octet-stream",
+          modelName + "_" + modelVersion + ".onnx"
+        );
+
+        saveFile(
+          JSON.stringify(modelConfig),
+          "application/json",
+          modelName + "_" + modelVersion + ".json"
+        );
+      })
+      .catch((e) => {
+        console.log(e);
+        var errorDescription = e.response.data?.error?.description;
+        if (errorDescription != null) toast.error(errorDescription);
+        else toast.error("Something Went Wrong.");
+      });
+  };
+
+  const saveFile = async (file, fileType, fileName) => {
+    const blob = new Blob([file], {
+      type: fileType,
+    });
+
+    const a = document.createElement("a");
+    a.download = fileName;
+    a.href = URL.createObjectURL(blob);
+    a.addEventListener("click", (e) => {
+      setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
+    });
+    a.click();
+  };
+
+  function base64ToArrayBuffer(base64) {
+    var binaryString = atob(base64);
+    var bytes = new Uint8Array(binaryString.length);
+    for (var i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
 
   return (
     <div className="adminPage">
-      {/* <SideBar></SideBar> */}
-
       <div className="admin-page-left-pane">
         <div className="page-title">
           <p className="heading3">Admin Panel</p>
@@ -130,7 +225,10 @@ function AdminPage() {
               <p className="heading5">{item.modelName}</p>
               <p className="subHeading3">{item.modelVersion}</p>
             </div>
-            <div className="right-content">
+            <div
+              className="right-content"
+              onClick={() => downloadModel(item.modelName, item.modelVersion)}
+            >
               <img
                 className="clickable"
                 src="/assets/icons/download_model.svg"
@@ -167,7 +265,8 @@ function AdminPage() {
               {modelContentBase64 != "" &&
               Object.keys(modelConfigJson).length != 0 ? (
                 <p className="subHeading2 selected-files">
-                  Selected files: [{filesNames}]
+                  Selected files: [{filesContent[0].name},{" "}
+                  {filesContent[1].name}]
                 </p>
               ) : (
                 <p className="subHeading2">Max upload size is 20 MBs</p>
@@ -197,7 +296,9 @@ function AdminPage() {
           {selectedUploadTypeIndex != 0 && (
             <DropdownComponent
               selectedItemIndex={selectedModelIndex}
-              itemList={modelList.map((item) => item.modelName)}
+              itemList={Array.from(
+                new Set(modelList.map((item) => item.modelName))
+              )}
               onChangeCallback={(selectedIndex) => {
                 setSelectedModelIndex(selectedIndex);
               }}

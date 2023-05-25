@@ -15,7 +15,12 @@ import InputModal from "../../components/inputModal/inputModal";
 import { getRequest } from "data/remote_datasource";
 import SideBar from "presentation/components/sideBar/side_bar";
 import axios from "axios";
-import { ACCESS_TOKEN, USER_EMAIL, CLIENT_ID } from "core/constants";
+import {
+  ACCESS_TOKEN,
+  USER_EMAIL,
+  CLIENT_ID,
+  APP_BASE_URL,
+} from "core/constants";
 import { useDispatch } from "react-redux";
 import {
   dashboardActions,
@@ -58,7 +63,7 @@ function DashboardPage() {
   const validateCliendID = async () => {
     await axios
       .post(
-        "http://localhost:8010/proxy/mds/api/v1/admin/sso",
+        `${APP_BASE_URL}/mds/api/v1/admin/sso`,
         { email: localStorage.getItem(USER_EMAIL) },
         {
           headers: { clientid: clientID },
@@ -88,7 +93,7 @@ function DashboardPage() {
     toast("Fetching data", { autoClose: 100 });
     var tempJson = {};
     await axios
-      .get("http://localhost:8010/proxy/mds/api/v1/admin/models", {
+      .get(`${APP_BASE_URL}/mds/api/v1/admin/models`, {
         headers: {
           clientid: clientID,
           tokenid: localStorage.getItem(USER_EMAIL),
@@ -105,7 +110,7 @@ function DashboardPage() {
             tempJson[key] = ["All Versions", modelNameVersionMap.modelVersion];
           }
         });
-        // dispatch(dashboardActions.setModels(tempJson));
+
         fetchMetrics(null, null);
         setModelJson(tempJson);
       })
@@ -118,14 +123,13 @@ function DashboardPage() {
   };
 
   const fetchMetrics = async (modelName, versionName) => {
-    // toast("Fetching data",{autoClose : 100});
     var uri = "";
     if (modelName == null && versionName == null) {
-      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/inference`;
+      uri = `${APP_BASE_URL}/dms/api/v1/metrics/clients/${clientID}/inference`;
     } else if (modelName != null && versionName == null) {
-      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/inference`;
+      uri = `${APP_BASE_URL}/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/inference`;
     } else if (modelName != null && versionName != null) {
-      uri = `http://localhost:9000/proxy/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/versions/${versionName}/inference`;
+      uri = `${APP_BASE_URL}/dms/api/v1/metrics/clients/${clientID}/models/${modelName}/versions/${versionName}/inference`;
     }
     console.log("request uri is", uri);
     await axios
@@ -157,7 +161,6 @@ function DashboardPage() {
           closeModalCallback={closeModalCallback}
         ></InputModal>
       )}
-
 
       {Object.keys(metrics).length != 0 && (
         <div className="dashboard-content">
@@ -262,7 +265,7 @@ function DashboardPage() {
               ></img>
               <div className="card-info">
                 <p className="bodyText">Latency Trends</p>
-                <p className="subHeading2">Last 20 Inferences</p>
+                <p className="subHeading2">Average latency per 30 mins</p>
               </div>
             </div>
             <AnalyticsLineChart
