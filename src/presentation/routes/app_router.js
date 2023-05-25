@@ -27,7 +27,7 @@ function AppRouter(props) {
 
     isTokenValid(token).then((isValid) => {
       if (isValid) {
-        if (!window.location.href.includes("/admin")) {
+        if (window.location.href.includes("/admin")) {
           navigateTo(ADMIN_PAGE_ROUTE);
         } else {
           navigateTo(DASHBOARD_PAGE_ROUTE);
