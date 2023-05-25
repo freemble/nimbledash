@@ -265,7 +265,7 @@ function DashboardPage() {
               ></img>
               <div className="card-info">
                 <p className="bodyText">Latency Trends</p>
-                <p className="subHeading2">Last 20 Inferences</p>
+                <p className="subHeading2">Average latency per 30 mins</p>
               </div>
             </div>
             <AnalyticsLineChart
