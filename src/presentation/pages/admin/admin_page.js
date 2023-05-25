@@ -7,7 +7,12 @@ import { encode as base64_encode } from "base-64";
 import { Buffer } from "buffer";
 import { Base64 } from "js-base64";
 import { useDispatch, useSelector } from "react-redux";
-import { ACCESS_TOKEN, CLIENT_ID, USER_EMAIL } from "core/constants";
+import {
+  ACCESS_TOKEN,
+  APP_BASE_URL,
+  CLIENT_ID,
+  USER_EMAIL,
+} from "core/constants";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { loaderActions } from "presentation/redux/stores/store";
@@ -40,7 +45,7 @@ function AdminPage() {
     dispatch(loaderActions.toggleLoader(true));
 
     await axios
-      .get("http://localhost:8010/proxy/mds/api/v1/admin/models", {
+      .get(`${APP_BASE_URL}/mds/api/v1/admin/models`, {
         headers: {
           clientid: localStorage.getItem(CLIENT_ID),
           tokenid: localStorage.getItem(USER_EMAIL),
@@ -84,7 +89,7 @@ function AdminPage() {
           dispatch(loaderActions.toggleLoader(true));
           await axios
             .post(
-              "http://localhost:8010/proxy/mds/api/v1/admin/model",
+              `${APP_BASE_URL}/mds/api/v1/admin/model`,
               {
                 modelConfig: modelConfigJson,
                 modelName: modelName,
@@ -113,7 +118,7 @@ function AdminPage() {
         dispatch(loaderActions.toggleLoader(true));
         await axios
           .put(
-            "http://localhost:8010/proxy/mds/api/v1/admin/model",
+            `${APP_BASE_URL}/mds/api/v1/admin/model`,
             {
               modelConfig: modelConfigJson,
               modelName: modelList[selectedModelIndex].modelName,
@@ -146,7 +151,7 @@ function AdminPage() {
   const downloadModel = async (modelName, modelVersion) => {
     await axios
       .get(
-        `http://localhost:8010/proxy/mds/api/v1/admin/models/${modelName}/versions/${modelVersion}`,
+        `${APP_BASE_URL}/mds/api/v1/admin/models/${modelName}/versions/${modelVersion}`,
         {
           headers: {
             clientid: localStorage.getItem(CLIENT_ID),
