@@ -41,6 +41,9 @@ function AppRouter(props) {
       var token = localStorage.getItem(ACCESS_TOKEN);
 
       isTokenValid(token).then((isValid) => {
+        if (isValid && currentBrowserUrl.includes("/login")) {
+          navigateTo(DASHBOARD_PAGE_ROUTE);
+        }
         if (!isValid && !currentBrowserUrl.includes("/login")) {
           localStorage.removeItem(CLIENT_ID);
           navigateTo(LOGIN_PAGE_ROUTE);
@@ -51,8 +54,8 @@ function AppRouter(props) {
   }, []);
 
   const isTokenValid = async (token) => {
-    if(token==null) return false;
-    
+    if (token == null) return false;
+
     return await axios
       .get(`${APP_BASE_URL}/mds/api/v1/admin/ping`, {
         headers: {
@@ -64,16 +67,15 @@ function AppRouter(props) {
         console.log(res);
         if (res.status == 200) {
           return true;
-        }
-        else{
+        } else {
           return false;
         }
       })
       .catch((e) => {
         console.log(e);
         return false;
-      });}
-
+      });
+  };
 
   return (
     <Routes>
