@@ -36,7 +36,7 @@
     "start:dev": "env-cmd -f dev.env npm start",
     "build:dev": "env-cmd -f dev.env npm build",
     "start:beta": "env-cmd -f stag.env npm run start",
-    "build:beta": "env-cmd -f stag.env npm run build",
+    "build:beta": "env-cmd -f stag.env npm run build"
   },
   "eslintConfig": {
     "extends": [
