@@ -37,7 +37,6 @@
     "build:dev": "env-cmd -f dev.env npm build",
     "start:beta": "env-cmd -f stag.env npm run start",
     "build:beta": "env-cmd -f stag.env npm run build",
-    "postinstall": "husky install"
   },
   "eslintConfig": {
     "extends": [
