@@ -117,8 +117,6 @@ function RBACPage() {
   };
 
   const deleteUser = async (inputEmail) => {
-    console.log("clientID", inputEmail);
-    dispatch(loaderActions.toggleLoader(true));
     await axios
       .delete(`${APP_BASE_URL}/mds/api/v1/admin/user`, {
         headers: {
@@ -133,7 +131,7 @@ function RBACPage() {
       })
       .then((res) => {
         console.log(res);
-        // window.location.reload();
+        window.location.reload();
       })
       .catch((e) => {
         dispatch(loaderActions.toggleLoader(false));
