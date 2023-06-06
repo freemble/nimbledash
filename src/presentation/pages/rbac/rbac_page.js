@@ -14,12 +14,14 @@ import {
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { loaderActions } from "presentation/redux/stores/store";
+import { useNavigate } from "react-router-dom";
+import { DASHBOARD_PAGE_ROUTE } from "presentation/routes/route-paths";
 
 function RBACPage() {
   var [isModalVisible, setModalVisiblity] = useState(false);
   var [userList, setUserList] = useState([]);
-  //   var [clientId,setClientID] = useState("");
   const dispatch = useDispatch();
+  const navigateTo = useNavigate();
 
   const onEnterEmail = (input) => {
     addUser(input);
@@ -49,6 +51,7 @@ function RBACPage() {
         var errorDescription = e.response.data?.error?.description;
         if (errorDescription != null) toast.error(errorDescription);
         else toast.error("Something Went Wrong.");
+        navigateTo(DASHBOARD_PAGE_ROUTE);
       });
     dispatch(loaderActions.toggleLoader(false));
   };
