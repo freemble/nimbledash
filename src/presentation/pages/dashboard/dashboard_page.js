@@ -99,7 +99,6 @@ function DashboardPage() {
   }, [clientID]);
 
   const fetchClientIDList = async () => {
-    console.log(localStorage.getItem(ACCESS_TOKEN));
     await axios
       .get(`${APP_BASE_URL}/mds/api/v1/admin/user/clients`, {
         headers: {
@@ -149,7 +148,6 @@ function DashboardPage() {
           }
         });
 
-        fetchMetrics(null, null);
         setModelJson(tempJson);
       })
       .catch((e) => {
@@ -210,7 +208,7 @@ function DashboardPage() {
         ></InputModal>
       )}
 
-      {Object.keys(metrics).length != 0 && (
+      {(Object.keys(metrics).length && Object.keys(modelJson).length) != 0 && (
         <div className="dashboard-content">
           <div className="page-title">
             <p className="heading3">Dashboard</p>

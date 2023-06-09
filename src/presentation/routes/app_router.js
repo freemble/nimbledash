@@ -51,7 +51,6 @@ function AppRouter(props) {
             COGNITO_USERNAME,
             decodedIdToken["cognito:username"]
           );
-          console.log("set hone ke baad", localStorage);
           navigateTo(DASHBOARD_PAGE_ROUTE);
         }
         dispatch(loaderActions.toggleLoader(false));
@@ -101,7 +100,7 @@ function AppRouter(props) {
       <Route path={DASHBOARD_PAGE_ROUTE} element={<DashboardPage />} />
       <Route path={ADMIN_PAGE_ROUTE} element={<AdminPage />} />
       <Route path={RBAC_PAGE_ROUTE} element={<RBACPage />} />
-      {/* <Route path="/*" element={<DashboardPage />} /> */}
+      {localStorage.getItem(ACCESS_TOKEN)!=null && <Route path="/" element={<DashboardPage />} />}
     </Routes>
   );
 }
