@@ -43,7 +43,6 @@ function RBACPage() {
         },
       })
       .then((res) => {
-        console.log(res);
         setUserList(res.data.users);
       })
       .catch((e) => {
@@ -211,8 +210,9 @@ function RBACPage() {
                         className="toggle-button"
                         icons={false}
                         defaultChecked={
-                          user.permission == PermissionEnum.READ_WRITE
+                          user.permission == PermissionEnum.READ_WRITE || user.permission == PermissionEnum.ADMIN
                         }
+                        disabled = {user.permission == PermissionEnum.ADMIN}
                         aria-label="No label tag"
                         onChange={(permission) => {
                           var isChecked = permission.target.checked;
@@ -232,12 +232,14 @@ function RBACPage() {
                       />
                     </div>
                     <div
-                      className="rbac-control-width-container rbac-trash"
+                      className="rbac-control-width-container rbac-trash" title={user.permission == PermissionEnum.ADMIN?"Superuser. Can't delete.":""}
                       onClick={() => {
-                        deleteUser(user.email);
+                        if(user.permission!=PermissionEnum.ADMIN){
+                          deleteUser(user.email);
+                        }
                       }}
                     >
-                      <img src="/assets/icons/trash.svg"></img>
+                      <img className="delete-user-icon" src={user.permission == PermissionEnum.ADMIN?"/assets/icons/super_user.svg":"/assets/icons/trash.svg"}></img>
                     </div>
                   </div>
                 </div>
@@ -246,7 +248,6 @@ function RBACPage() {
               <div
                 className="rbac-table-row add-rbac-user"
                 onClick={() => {
-                  console.log("click tohho rha hai");
                   setModalVisiblity(true);
                 }}
               >

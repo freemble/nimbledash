@@ -5,7 +5,7 @@ import {
   LOGIN_PAGE_ROUTE,
   RBAC_PAGE_ROUTE,
 } from "./route-paths";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import LoginPage from "presentation/pages/login/login_page";
 import DashboardPage from "presentation/pages/dashboard/dashboard_page";
 import InputModal from "presentation/components/inputModal/inputModal";
@@ -28,11 +28,11 @@ import RBACPage from "presentation/pages/rbac/rbac_page";
 function AppRouter(props) {
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
+  const canRender = useState(false);
 
   useEffect(() => {
     dispatch(loaderActions.toggleLoader(true));
     var currentBrowserUrl = window.location.href;
-    console.log(currentBrowserUrl);
 
     if (currentBrowserUrl.includes("access_token")) {
       var myUrl = new URL(window.location.href.replace(/#/g, "?"));
@@ -51,8 +51,10 @@ function AppRouter(props) {
             COGNITO_USERNAME,
             decodedIdToken["cognito:username"]
           );
+          console.log("set hone ke baad", localStorage);
           navigateTo(DASHBOARD_PAGE_ROUTE);
         }
+        dispatch(loaderActions.toggleLoader(false));
       });
     } else {
       var token = localStorage.getItem(ACCESS_TOKEN);
@@ -66,8 +68,8 @@ function AppRouter(props) {
           navigateTo(LOGIN_PAGE_ROUTE);
         }
       });
+      dispatch(loaderActions.toggleLoader(false));
     }
-    dispatch(loaderActions.toggleLoader(false));
   }, []);
 
   const isTokenValid = async (token) => {
@@ -99,7 +101,7 @@ function AppRouter(props) {
       <Route path={DASHBOARD_PAGE_ROUTE} element={<DashboardPage />} />
       <Route path={ADMIN_PAGE_ROUTE} element={<AdminPage />} />
       <Route path={RBAC_PAGE_ROUTE} element={<RBACPage />} />
-      <Route path="/*" element={<DashboardPage />} />
+      {/* <Route path="/*" element={<DashboardPage />} /> */}
     </Routes>
   );
 }
