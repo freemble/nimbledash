@@ -29,10 +29,13 @@ function AnalyticsLineChart(props) {
     });
 
     //add 0 to the shorter arrays
-    modelKeys.forEach((modelName)=>{
-      var modelArray = trends[modelName];
+    modelKeys.forEach((modelName) => {
+      var modelArray = trends[modelName].map((num) => num / 1000);
       modelArray.reverse();
-      trends[modelName] = Array.from({length: maxLen-modelArray.length}, () => 0).concat(modelArray);
+      trends[modelName] = Array.from(
+        { length: maxLen - modelArray.length },
+        () => 0
+      ).concat(modelArray);
     });
 
     //transform data
@@ -66,16 +69,16 @@ function AnalyticsLineChart(props) {
         <YAxis unit=" millls" width={100} />
         <Tooltip />
         <Legend />
-          {Object.keys(trends).map((key, index) => (
-            <Line
-              type="monotone"
-              dataKey={key}
-              stroke={STROKE_COLORS_LIST[index % STROKE_COLORS_LIST.length]}
-              strokeWidth={3}
-              activeDot={{ r: 4 }}
-              dot = {false}
-            />
-          ))}
+        {Object.keys(trends).map((key, index) => (
+          <Line
+            type="monotone"
+            dataKey={key}
+            stroke={STROKE_COLORS_LIST[index % STROKE_COLORS_LIST.length]}
+            strokeWidth={3}
+            activeDot={{ r: 4 }}
+            dot={false}
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   );
