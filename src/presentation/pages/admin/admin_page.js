@@ -22,12 +22,13 @@ function AdminPage() {
   const dispatch = useDispatch();
   var modelContentBase64 = "";
   var modelConfigJson = {};
+  var modelType = "";
   const uploadType = ["New Model", "Build", "Update", "Fix"];
   const [selectedUploadTypeIndex, setSelectedUploadTypeIndex] = useState(0);
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
   const [modelList, setModelList] = useState([]);
   const [openFileSelector, { filesContent, loading }] = useFilePicker({
-    accept: [".onnx", ".json"],
+    accept: [".onnx", ".ort", ".json"],
     readAs: "ArrayBuffer",
     multiple: true,
     limitFilesConfig: { max: 2, min: 2 },
@@ -73,7 +74,12 @@ function AdminPage() {
     if (file["name"].includes(".onnx")) {
       const binary8 = new Uint8Array(file.content);
       modelContentBase64 = Buffer.from(binary8).toString("base64");
-    } else {
+      modelType = "onnx";
+    } else if (file["name"].includes(".ort")) {
+      const binary8 = new Uint8Array(file.content);
+      modelContentBase64 = Buffer.from(binary8).toString("base64");
+      modelType = "ort";
+    } else{
       modelConfigJson = JSON.parse(new TextDecoder().decode(file.content));
     }
   });
@@ -97,6 +103,7 @@ function AdminPage() {
                 modelConfig: modelConfigJson,
                 modelName: modelName,
                 model: modelContentBase64,
+                type : modelType,
               },
               {
                 headers: {
@@ -129,6 +136,7 @@ function AdminPage() {
               modelName: modelList[selectedModelIndex].modelName,
               model: modelContentBase64,
               updateType: selectedUploadTypeIndex,
+              type : modelType,
             },
             {
               headers: {
@@ -174,12 +182,21 @@ function AdminPage() {
 
         var modelBinary = new Uint8Array(base64ToArrayBuffer(res.data.model));
         var modelConfig = res.data.modelConfig;
+        var modelType = res.data.modelType;
 
-        saveFile(
-          modelBinary,
-          "application/octet-stream",
-          modelName + "_" + modelVersion + ".ort"
-        );
+        if (modelType == "ort") {
+          saveFile(
+            modelBinary,
+            "application/octet-stream",
+            modelName + "_" + modelVersion + ".ort"
+          );
+        }else {
+          saveFile(
+            modelBinary,
+            "application/octet-stream",
+            modelName + "_" + modelVersion + ".onnx"
+          );
+        }
 
         saveFile(
           JSON.stringify(modelConfig),
